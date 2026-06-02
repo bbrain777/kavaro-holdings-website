@@ -1,0 +1,5 @@
+/* Compatibility stylesheet. The active KAVARO React site imports its real styles from src/style.css. */
+
+:root {
+  --kavaro-active-stylesheet: "src/style.css";
+}

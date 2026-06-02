@@ -1,0 +1,83 @@
+[
+  {
+    "id": "kavaro-london-executive-one",
+    "apartmentName": "KAVARO Executive City Apartment",
+    "location": "London, United Kingdom",
+    "addressArea": "Canary Wharf / East London",
+    "shortDescription": "A polished city apartment prepared for business stays, short lets and serviced accommodation enquiries.",
+    "fullDescription": "KAVARO Executive City Apartment is presented as a premium short-stay and serviced accommodation option for professionals, visiting families and corporate guests who need a clean, well-positioned London base. The apartment is structured for future online booking, payment confirmation and guest verification workflows.",
+    "pricePerNight": 145,
+    "pricePerWeek": 875,
+    "pricePerMonth": 3100,
+    "cleaningFee": 65,
+    "securityDeposit": 250,
+    "maxGuests": 4,
+    "bedrooms": 2,
+    "bathrooms": 2,
+    "propertyType": "Serviced apartment",
+    "availabilityStatus": "Available",
+    "availableDates": ["2026-06-10", "2026-06-11", "2026-06-12", "2026-06-13", "2026-06-14"],
+    "amenities": ["Wi-Fi", "Workspace", "Smart TV", "Kitchen", "Laundry", "Lift access", "Long stay ready"],
+    "images": [
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=85"
+    ],
+    "houseRules": ["No parties", "No smoking indoors", "Quiet hours after 10 PM", "Valid identification may be required"],
+    "cancellationPolicy": "Cancellation terms apply and are subject to confirmation before booking approval."
+  },
+  {
+    "id": "kavaro-manchester-business-stay",
+    "apartmentName": "KAVARO Business Stay Suite",
+    "location": "Manchester, United Kingdom",
+    "addressArea": "Manchester City Centre",
+    "shortDescription": "A business-friendly apartment concept for short stays, relocation support and professional travel.",
+    "fullDescription": "KAVARO Business Stay Suite is designed for corporate visitors, consultants and guests who need a comfortable short-stay base with work-ready amenities. Availability and pricing are subject to confirmation until live booking and payment integrations are activated.",
+    "pricePerNight": 118,
+    "pricePerWeek": 725,
+    "pricePerMonth": 2650,
+    "cleaningFee": 55,
+    "securityDeposit": 200,
+    "maxGuests": 3,
+    "bedrooms": 1,
+    "bathrooms": 1,
+    "propertyType": "Short stay apartment",
+    "availabilityStatus": "Available",
+    "availableDates": ["2026-06-18", "2026-06-19", "2026-06-20", "2026-06-21"],
+    "amenities": ["Wi-Fi", "Dedicated desk", "Kitchen", "Washer dryer", "City access", "Short stay ready"],
+    "images": [
+      "https://images.unsplash.com/photo-1560448075-bb485b067938?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1200&q=85"
+    ],
+    "houseRules": ["No parties", "No smoking indoors", "Respect neighbours", "Guest count must match booking"],
+    "cancellationPolicy": "Flexible cancellation can be reviewed before booking confirmation."
+  },
+  {
+    "id": "kavaro-birmingham-family-let",
+    "apartmentName": "KAVARO Family Serviced Apartment",
+    "location": "Birmingham, United Kingdom",
+    "addressArea": "Edgbaston / City Fringe",
+    "shortDescription": "A family-ready serviced accommodation option for medium stays and relocation enquiries.",
+    "fullDescription": "KAVARO Family Serviced Apartment supports family visits, relocation stays and longer rental enquiries. It is presented with a larger guest capacity and a practical amenity profile for guests who need comfort, space and flexible booking terms.",
+    "pricePerNight": 132,
+    "pricePerWeek": 820,
+    "pricePerMonth": 2950,
+    "cleaningFee": 70,
+    "securityDeposit": 275,
+    "maxGuests": 5,
+    "bedrooms": 2,
+    "bathrooms": 1,
+    "propertyType": "Long stay serviced accommodation",
+    "availabilityStatus": "Limited Availability",
+    "availableDates": ["2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04"],
+    "amenities": ["Wi-Fi", "Family kitchen", "Parking nearby", "Laundry", "Long stay ready", "Smart TV"],
+    "images": [
+      "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1560448205-4d9b3e6bb6db?auto=format&fit=crop&w=1200&q=85",
+      "https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=1200&q=85"
+    ],
+    "houseRules": ["No parties", "No smoking indoors", "Children must be supervised", "Check-in details issued after approval"],
+    "cancellationPolicy": "Cancellation policy applies and may vary for long-stay enquiries."
+  }
+]
