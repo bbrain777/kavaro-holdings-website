@@ -76,6 +76,114 @@ const bookingNotices = [
   'KAVARO Holdings Ltd reserves the right to approve, decline, or cancel bookings where necessary.',
 ];
 
+const apartmentStorageKey = 'kavaroCustomApartments';
+
+const emptyApartmentForm = {
+  id: '',
+  apartmentName: '',
+  location: '',
+  addressArea: '',
+  shortDescription: '',
+  fullDescription: '',
+  pricePerNight: '',
+  pricePerWeek: '',
+  pricePerMonth: '',
+  cleaningFee: '',
+  securityDeposit: '',
+  maxGuests: '1',
+  bedrooms: '1',
+  bathrooms: '1',
+  propertyType: 'Short stay apartment',
+  availabilityStatus: 'Available',
+  availableDates: '',
+  amenities: '',
+  houseRules: '',
+  cancellationPolicy: 'Cancellation terms apply and are subject to confirmation before booking approval.',
+  images: [],
+  imageUrl: '',
+};
+
+function slugify(value) {
+  const slug = value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return slug || `apartment-${Date.now()}`;
+}
+
+function splitList(value) {
+  return String(value || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function loadCustomApartments() {
+  try {
+    const saved = localStorage.getItem(apartmentStorageKey);
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeApartment(form) {
+  const images = [...form.images, form.imageUrl].filter(Boolean);
+
+  return {
+    id: form.id || `custom-${slugify(form.apartmentName)}`,
+    apartmentName: form.apartmentName,
+    location: form.location,
+    addressArea: form.addressArea,
+    shortDescription: form.shortDescription,
+    fullDescription: form.fullDescription || form.shortDescription,
+    pricePerNight: Number(form.pricePerNight || 0),
+    pricePerWeek: Number(form.pricePerWeek || 0),
+    pricePerMonth: Number(form.pricePerMonth || 0),
+    cleaningFee: Number(form.cleaningFee || 0),
+    securityDeposit: Number(form.securityDeposit || 0),
+    maxGuests: Number(form.maxGuests || 1),
+    bedrooms: Number(form.bedrooms || 1),
+    bathrooms: Number(form.bathrooms || 1),
+    propertyType: form.propertyType,
+    availabilityStatus: form.availabilityStatus,
+    availableDates: splitList(form.availableDates),
+    amenities: splitList(form.amenities),
+    images: images.length ? images : ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=85'],
+    houseRules: splitList(form.houseRules),
+    cancellationPolicy: form.cancellationPolicy,
+    isCustom: true,
+  };
+}
+
+function apartmentToForm(apartment) {
+  return {
+    ...emptyApartmentForm,
+    ...apartment,
+    availableDates: (apartment.availableDates || []).join(', '),
+    amenities: (apartment.amenities || []).join(', '),
+    houseRules: (apartment.houseRules || []).join(', '),
+    images: apartment.images || [],
+    imageUrl: '',
+  };
+}
+
+function useApartmentListings() {
+  const [customApartments, setCustomApartments] = useState(() => loadCustomApartments());
+
+  const saveCustomApartments = (nextApartments) => {
+    setCustomApartments(nextApartments);
+    localStorage.setItem(apartmentStorageKey, JSON.stringify(nextApartments));
+  };
+
+  return {
+    listings: useMemo(() => [...apartments, ...customApartments], [customApartments]),
+    customApartments,
+    saveCustomApartments,
+  };
+}
+
 function getPageName() {
   const page = window.location.pathname.split('/').pop() || 'index.html';
   return page === '' ? 'index.html' : page;
@@ -498,15 +606,17 @@ function VenturesPage() {
 }
 
 function StaysPreview() {
+  const { listings } = useApartmentListings();
+
   return (
     <section className="section stays-preview">
       <div className="container">
         <div className="section-header align-left">
           <span className="section-kicker">KAVARO Stays</span>
           <h2>Available apartments and serviced accommodation.</h2>
-          <p>Short-stay, long-stay and serviced rental information is managed manually from data/apartments.json.</p>
+          <p>Short-stay, long-stay and serviced rental information can be managed from the front-end apartment editor.</p>
         </div>
-        <ApartmentGrid apartments={apartments.slice(0, 3)} />
+        <ApartmentGrid apartments={listings.slice(0, 3)} />
       </div>
     </section>
   );
@@ -540,6 +650,7 @@ function ApartmentGrid({ apartments: items }) {
 }
 
 function StaysPage() {
+  const { listings, customApartments, saveCustomApartments } = useApartmentListings();
   const [filters, setFilters] = useState({
     location: '',
     maxPrice: '',
@@ -550,26 +661,27 @@ function StaysPage() {
     stayType: '',
   });
 
-  const filteredApartments = useMemo(() => apartments.filter((apartment) => {
+  const filteredApartments = useMemo(() => listings.filter((apartment) => {
     const matchesLocation = !filters.location || apartment.location.toLowerCase().includes(filters.location.toLowerCase());
     const matchesPrice = !filters.maxPrice || apartment.pricePerNight <= Number(filters.maxPrice);
     const matchesGuests = !filters.guests || apartment.maxGuests >= Number(filters.guests);
     const matchesBedrooms = !filters.bedrooms || apartment.bedrooms >= Number(filters.bedrooms);
     const matchesStayType = !filters.stayType || apartment.propertyType.toLowerCase().includes(filters.stayType.toLowerCase()) || apartment.amenities.join(' ').toLowerCase().includes(filters.stayType.toLowerCase());
     return matchesLocation && matchesPrice && matchesGuests && matchesBedrooms && matchesStayType;
-  }), [filters]);
+  }), [filters, listings]);
 
   return (
     <>
       <PageHero
         kicker="KAVARO Stays"
         title="Premium apartment listings and booking preparation."
-        text="Browse available apartments, serviced accommodation and rental properties. Payments are prepared for future integration and not yet live."
+        text="Browse available apartments, serviced accommodation and rental properties. Card payments can be handled securely through Stripe when configured in Vercel."
         image="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1800&q=85"
       />
       <section className="section intro-section">
         <div className="container">
           <ApartmentFilters filters={filters} setFilters={setFilters} />
+          <ApartmentManager customApartments={customApartments} saveCustomApartments={saveCustomApartments} />
           <ApartmentGrid apartments={filteredApartments} />
           <LegalNotices />
         </div>
@@ -599,10 +711,150 @@ function ApartmentFilters({ filters, setFilters }) {
   );
 }
 
+function ApartmentManager({ customApartments, saveCustomApartments }) {
+  const [form, setForm] = useState(emptyApartmentForm);
+  const [status, setStatus] = useState('');
+
+  const update = (event) => {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const uploadImages = async (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    const imageData = await Promise.all(files.map((file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    })));
+
+    setForm((current) => ({ ...current, images: [...current.images, ...imageData] }));
+    event.target.value = '';
+  };
+
+  const submit = (event) => {
+    event.preventDefault();
+    setStatus('');
+
+    if (!form.apartmentName || !form.location || !form.pricePerNight || !form.shortDescription) {
+      setStatus('Please complete apartment name, location, nightly price and short description.');
+      return;
+    }
+
+    const apartment = normalizeApartment(form);
+    const nextApartments = customApartments.some((item) => item.id === apartment.id)
+      ? customApartments.map((item) => (item.id === apartment.id ? apartment : item))
+      : [...customApartments, apartment];
+
+    saveCustomApartments(nextApartments);
+    setForm(emptyApartmentForm);
+    setStatus(`${apartment.apartmentName} has been saved.`);
+  };
+
+  const editApartment = (apartment) => {
+    setForm(apartmentToForm(apartment));
+    setStatus(`Editing ${apartment.apartmentName}.`);
+  };
+
+  const deleteApartment = (apartmentId) => {
+    saveCustomApartments(customApartments.filter((item) => item.id !== apartmentId));
+    if (form.id === apartmentId) setForm(emptyApartmentForm);
+    setStatus('Apartment removed from the front-end list.');
+  };
+
+  const removeImage = (image) => {
+    setForm((current) => ({ ...current, images: current.images.filter((item) => item !== image) }));
+  };
+
+  return (
+    <section className="apartment-manager" aria-label="Apartment manager">
+      <div className="section-header align-left">
+        <span className="section-kicker">Apartment Manager</span>
+        <h2>Create or edit guest-ready listings.</h2>
+        <p>Saved listings appear immediately on this page, the details page and booking page in this browser.</p>
+      </div>
+      <form className="manager-form" onSubmit={submit} noValidate>
+        <div className="form-row">
+          <label>Apartment name<input name="apartmentName" value={form.apartmentName} onChange={update} required /></label>
+          <label>Location<input name="location" value={form.location} onChange={update} placeholder="London, United Kingdom" required /></label>
+        </div>
+        <label>Address area<input name="addressArea" value={form.addressArea} onChange={update} placeholder="Canary Wharf / East London" /></label>
+        <label>Short description<textarea name="shortDescription" rows="3" value={form.shortDescription} onChange={update} required /></label>
+        <label>Full guest description<textarea name="fullDescription" rows="5" value={form.fullDescription} onChange={update} /></label>
+        <div className="form-row">
+          <label>Nightly price (£)<input name="pricePerNight" value={form.pricePerNight} onChange={update} type="number" min="0" required /></label>
+          <label>Weekly price (£)<input name="pricePerWeek" value={form.pricePerWeek} onChange={update} type="number" min="0" /></label>
+        </div>
+        <div className="form-row">
+          <label>Monthly price (£)<input name="pricePerMonth" value={form.pricePerMonth} onChange={update} type="number" min="0" /></label>
+          <label>Cleaning fee (£)<input name="cleaningFee" value={form.cleaningFee} onChange={update} type="number" min="0" /></label>
+        </div>
+        <div className="form-row">
+          <label>Security deposit (£)<input name="securityDeposit" value={form.securityDeposit} onChange={update} type="number" min="0" /></label>
+          <label>Availability<select name="availabilityStatus" value={form.availabilityStatus} onChange={update}>
+            <option>Available</option>
+            <option>Limited Availability</option>
+            <option>Reserved</option>
+            <option>Unavailable</option>
+          </select></label>
+        </div>
+        <div className="form-row">
+          <label>Guests<input name="maxGuests" value={form.maxGuests} onChange={update} type="number" min="1" /></label>
+          <label>Bedrooms<input name="bedrooms" value={form.bedrooms} onChange={update} type="number" min="0" /></label>
+        </div>
+        <div className="form-row">
+          <label>Bathrooms<input name="bathrooms" value={form.bathrooms} onChange={update} type="number" min="0" /></label>
+          <label>Property type<input name="propertyType" value={form.propertyType} onChange={update} /></label>
+        </div>
+        <label>Amenities, separated by commas<input name="amenities" value={form.amenities} onChange={update} placeholder="Wi-Fi, Kitchen, Parking" /></label>
+        <label>House rules, separated by commas<input name="houseRules" value={form.houseRules} onChange={update} placeholder="No smoking indoors, No parties" /></label>
+        <label>Available dates, separated by commas<input name="availableDates" value={form.availableDates} onChange={update} placeholder="2026-06-10, 2026-06-11" /></label>
+        <label>Cancellation policy<textarea name="cancellationPolicy" rows="3" value={form.cancellationPolicy} onChange={update} /></label>
+        <div className="form-row">
+          <label>Upload apartment photos<input type="file" accept="image/*" multiple onChange={uploadImages} /></label>
+          <label>Or image URL<input name="imageUrl" value={form.imageUrl} onChange={update} placeholder="https://..." /></label>
+        </div>
+        {form.images.length > 0 && (
+          <div className="image-preview-grid">
+            {form.images.map((image) => (
+              <button type="button" key={image} onClick={() => removeImage(image)} aria-label="Remove uploaded photo">
+                <img src={image} alt="" />
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="manager-actions">
+          <button className="btn btn-primary" type="submit">{form.id ? 'Update Apartment' : 'Create Apartment'}</button>
+          <button className="btn btn-secondary tech-link" type="button" onClick={() => setForm(emptyApartmentForm)}>Clear Form</button>
+        </div>
+        {status && <p className="form-status">{status}</p>}
+      </form>
+      {customApartments.length > 0 && (
+        <div className="managed-list">
+          {customApartments.map((apartment) => (
+            <article key={apartment.id}>
+              <div>
+                <strong>{apartment.apartmentName}</strong>
+                <span>{apartment.location}</span>
+              </div>
+              <button type="button" onClick={() => editApartment(apartment)}>Edit</button>
+              <button type="button" onClick={() => deleteApartment(apartment.id)}>Delete</button>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function ApartmentDetailsPage() {
+  const { listings } = useApartmentListings();
   const params = new URLSearchParams(window.location.search);
-  const apartment = apartments.find((item) => item.id === params.get('id')) || apartments[0];
-  const similar = apartments.filter((item) => item.id !== apartment.id).slice(0, 2);
+  const apartment = listings.find((item) => item.id === params.get('id')) || listings[0];
+  const similar = listings.filter((item) => item.id !== apartment.id).slice(0, 2);
 
   return (
     <>
@@ -665,8 +917,9 @@ function InfoList({ title, items }) {
 }
 
 function BookingPage() {
+  const { listings } = useApartmentListings();
   const params = new URLSearchParams(window.location.search);
-  const apartment = apartments.find((item) => item.id === params.get('id')) || apartments[0];
+  const apartment = listings.find((item) => item.id === params.get('id')) || listings[0];
   const [form, setForm] = useState({ fullName: '', email: '', phone: '', checkIn: '', checkOut: '', guests: '1', message: '' });
   const [error, setError] = useState('');
   const nights = nightsBetween(form.checkIn, form.checkOut);
@@ -698,7 +951,7 @@ function BookingPage() {
       <PageHero
         kicker="Booking"
         title={`Book ${apartment.apartmentName}`}
-        text="Complete the form to prepare your booking summary. Payment integration is pending and no live payment will be taken."
+        text="Complete the form to prepare your booking summary, then continue to payment."
         image={apartment.images[0]}
       />
       <section className="section intro-section">

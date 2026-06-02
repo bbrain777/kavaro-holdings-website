@@ -110,6 +110,10 @@ Apartments are updated manually in:
 data/apartments.json
 ```
 
+The Stays page also includes a front-end apartment manager for creating and editing listings from the browser. It supports photo upload previews and saves custom listings to browser `localStorage`, so those custom listings appear immediately on the Stays, Details and Booking pages in the same browser.
+
+For a production admin where updates appear to every visitor, connect this flow to a database and file storage service. The committed `data/apartments.json` remains the trusted source for deployed default apartments and Stripe server-side price validation.
+
 ### Add A New Apartment
 
 1. Copy an existing apartment object.
