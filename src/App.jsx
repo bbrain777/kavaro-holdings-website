@@ -718,9 +718,20 @@ function AdminGate({ children }) {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [status, setStatus] = useState('');
 
+  const readApiResponse = async (response) => {
+    const text = await response.text();
+    if (!text) return {};
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error('Admin API is not available on this local server. Use Vercel deployment or run the site with vercel dev.');
+    }
+  };
+
   useEffect(() => {
     fetch('/api/admin-session')
-      .then((response) => response.json())
+      .then(readApiResponse)
       .then((data) => setSession({ loading: false, authenticated: Boolean(data.authenticated), email: data.email || '' }))
       .catch(() => setSession({ loading: false, authenticated: false, email: '' }));
   }, []);
@@ -740,7 +751,7 @@ function AdminGate({ children }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
       });
-      const data = await response.json();
+      const data = await readApiResponse(response);
 
       if (!response.ok || !data.authenticated) {
         throw new Error(data.error || 'Admin access denied.');
@@ -775,6 +786,7 @@ function AdminGate({ children }) {
           <span className="section-kicker">Admin Access</span>
           <h2>Sign in to manage apartment listings.</h2>
           <p>Only authorised KAVARO administrators can create or edit guest-ready listings.</p>
+          <p>For local testing, run with Vercel Dev so the admin API routes are available.</p>
         </div>
         <form className="manager-form" onSubmit={login} noValidate>
           <div className="form-row">

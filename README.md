@@ -86,6 +86,14 @@ The apartment manager on `stays.html` is protected by Vercel serverless authenti
 
 After adding or changing admin environment variables, redeploy the Vercel project.
 
+For local admin testing, run the project with Vercel Dev instead of plain Vite so `/api/admin-login`, `/api/admin-session` and `/api/admin-logout` are available:
+
+```bash
+vercel dev
+```
+
+Plain `npm run dev` starts the Vite front end only, so the admin API routes will not respond on `localhost:5173`.
+
 ### Production Domains
 
 Add these domains in the Vercel project under Settings > Domains:
