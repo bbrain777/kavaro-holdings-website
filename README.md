@@ -34,6 +34,57 @@ npm run build
 npm run preview
 ```
 
+## Vercel Deployment
+
+This project is a Vite React website.
+
+### Vercel Project Settings
+
+- GitHub repository: `bbrain777/KAVARO-HOLDINGS-LTD`
+- Vercel project name: `kavaro-holdings-website`
+- Framework preset: `Vite`
+- Build command: `npm run build`
+- Output directory: `dist`
+- Install command: `npm install`
+
+### Import To Vercel
+
+1. Go to https://vercel.com/new.
+2. Choose the GitHub repository `bbrain777/KAVARO-HOLDINGS-LTD`.
+3. Set the project name to `kavaro-holdings-website`.
+4. Keep the Vite defaults:
+   - Build command: `npm run build`
+   - Output directory: `dist`
+5. Deploy the project.
+
+### Production Domains
+
+Add these domains in the Vercel project under Settings > Domains:
+
+- `kavaroholdings.com`
+- `www.kavaroholdings.com`
+
+### Namecheap DNS Records
+
+Use Namecheap only for domain/DNS management. Do not buy Namecheap hosting.
+
+Remove any conflicting old A, CNAME, parking, forwarding, or URL redirect records for `@` and `www`, then add:
+
+| Type | Host | Value | TTL |
+| --- | --- | --- | --- |
+| A Record | `@` | `76.76.21.21` | Automatic |
+| CNAME Record | `www` | `cname.vercel-dns.com` | Automatic |
+
+After DNS propagation, verify:
+
+- `https://kavaroholdings.com`
+- `https://www.kavaroholdings.com`
+- SSL certificate is active in Vercel.
+- Navigation links work.
+- Mobile layout works.
+- Contact form displays and validates.
+- Booking and payment placeholder pages work.
+
 ## Apartment Data
 
 Apartments are updated manually in:
