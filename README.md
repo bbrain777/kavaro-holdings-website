@@ -53,9 +53,26 @@ This project is a Vite React website.
 2. Choose the GitHub repository `bbrain777/KAVARO-HOLDINGS-LTD`.
 3. Set the project name to `kavaro-holdings-website`.
 4. Keep the Vite defaults:
-   - Build command: `npm run build`
-   - Output directory: `dist`
+- Build command: `npm run build`
+- Output directory: `dist`
 5. Deploy the project.
+
+### Stripe Card Payments
+
+The Debit/Credit Card button uses Stripe Checkout through the Vercel function:
+
+```text
+api/create-checkout-session.js
+```
+
+Add these environment variables in Vercel under Project Settings > Environment Variables:
+
+| Name | Example value | Notes |
+| --- | --- | --- |
+| `STRIPE_SECRET_KEY` | `sk_live_...` | Use `sk_test_...` while testing, then replace with the live key when ready. |
+| `SITE_URL` | `https://kavaroholdings.com` | Used for Stripe success/cancel redirect URLs. |
+
+After adding or changing environment variables, redeploy the Vercel project.
 
 ### Production Domains
 

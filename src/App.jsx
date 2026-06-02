@@ -742,18 +742,45 @@ function PriceBreakdown({ apartment, nights, total }) {
 
 function PaymentPage() {
   const [summary, setSummary] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState('');
 
   useEffect(() => {
     const saved = localStorage.getItem('kavaroBookingSummary');
     if (saved) setSummary(JSON.parse(saved));
   }, []);
 
+  const startStripeCheckout = async () => {
+    if (!summary) {
+      setPaymentStatus('Please start from the booking page before paying.');
+      return;
+    }
+
+    setPaymentStatus('Preparing secure Stripe checkout...');
+
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(summary),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || 'Unable to start Stripe checkout.');
+      }
+
+      window.location.href = data.url;
+    } catch (error) {
+      setPaymentStatus(error.message);
+    }
+  };
+
   return (
     <>
       <PageHero
         kicker="Payment"
-        title="Payment integration pending."
-        text="Review the booking summary. Debit/Credit Card, PayPal, Bank Transfer, Stripe, Paystack and Flutterwave are prepared for future integration."
+        title="Secure card payment with Stripe."
+        text="Review the booking summary, then continue to Stripe Checkout for UK card payment. Other payment methods remain prepared for future integration."
       />
       <section className="section intro-section">
         <div className="container payment-grid">
@@ -775,12 +802,17 @@ function PaymentPage() {
             )}
           </aside>
           <div className="payment-options">
-            {['Debit/Credit Card', 'PayPal', 'Bank Transfer', 'Stripe placeholder', 'Paystack placeholder', 'Flutterwave placeholder'].map((option) => (
+            <button type="button" className="payment-option payment-option-active" onClick={startStripeCheckout}>
+              <strong>Debit/Credit Card</strong>
+              <span>Pay securely with Stripe Checkout</span>
+            </button>
+            {['PayPal', 'Bank Transfer', 'Paystack placeholder', 'Flutterwave placeholder'].map((option) => (
               <button type="button" className="payment-option" key={option}>
                 <strong>{option}</strong>
                 <span>Payment integration pending</span>
               </button>
             ))}
+            {paymentStatus && <p className="form-status">{paymentStatus}</p>}
           </div>
         </div>
       </section>

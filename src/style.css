@@ -1282,6 +1282,16 @@ blockquote {
   font-weight: 800;
 }
 
+.payment-option-active {
+  cursor: pointer;
+  border-color: rgba(212, 175, 55, 0.52);
+}
+
+.payment-option-active:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 34px rgba(212, 175, 55, 0.18);
+}
+
 .profile-links {
   grid-template-columns: minmax(0, 1fr) auto auto auto;
   align-items: center;
