@@ -681,7 +681,9 @@ function StaysPage() {
       <section className="section intro-section">
         <div className="container">
           <ApartmentFilters filters={filters} setFilters={setFilters} />
-          <ApartmentManager customApartments={customApartments} saveCustomApartments={saveCustomApartments} />
+          <AdminGate>
+            <ApartmentManager customApartments={customApartments} saveCustomApartments={saveCustomApartments} />
+          </AdminGate>
           <ApartmentGrid apartments={filteredApartments} />
           <LegalNotices />
         </div>
@@ -708,6 +710,92 @@ function ApartmentFilters({ filters, setFilters }) {
         <option value="serviced">Serviced accommodation</option>
       </select>
     </form>
+  );
+}
+
+function AdminGate({ children }) {
+  const [session, setSession] = useState({ loading: true, authenticated: false, email: '' });
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [status, setStatus] = useState('');
+
+  useEffect(() => {
+    fetch('/api/admin-session')
+      .then((response) => response.json())
+      .then((data) => setSession({ loading: false, authenticated: Boolean(data.authenticated), email: data.email || '' }))
+      .catch(() => setSession({ loading: false, authenticated: false, email: '' }));
+  }, []);
+
+  const update = (event) => {
+    const { name, value } = event.target;
+    setCredentials((current) => ({ ...current, [name]: value }));
+  };
+
+  const login = async (event) => {
+    event.preventDefault();
+    setStatus('Checking admin access...');
+
+    try {
+      const response = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.authenticated) {
+        throw new Error(data.error || 'Admin access denied.');
+      }
+
+      setSession({ loading: false, authenticated: true, email: data.email });
+      setCredentials({ email: '', password: '' });
+      setStatus('');
+    } catch (error) {
+      setStatus(error.message);
+    }
+  };
+
+  const logout = async () => {
+    await fetch('/api/admin-logout', { method: 'POST' }).catch(() => undefined);
+    setSession({ loading: false, authenticated: false, email: '' });
+    setStatus('');
+  };
+
+  if (session.loading) {
+    return (
+      <section className="admin-panel">
+        <p className="form-status">Checking admin session...</p>
+      </section>
+    );
+  }
+
+  if (!session.authenticated) {
+    return (
+      <section className="admin-panel" aria-label="Admin login">
+        <div className="section-header align-left">
+          <span className="section-kicker">Admin Access</span>
+          <h2>Sign in to manage apartment listings.</h2>
+          <p>Only authorised KAVARO administrators can create or edit guest-ready listings.</p>
+        </div>
+        <form className="manager-form" onSubmit={login} noValidate>
+          <div className="form-row">
+            <label>Email<input name="email" type="email" value={credentials.email} onChange={update} required /></label>
+            <label>Password<input name="password" type="password" value={credentials.password} onChange={update} required /></label>
+          </div>
+          <button className="btn btn-primary" type="submit">Admin Sign In</button>
+          {status && <p className="form-status">{status}</p>}
+        </form>
+      </section>
+    );
+  }
+
+  return (
+    <>
+      <section className="admin-session-bar">
+        <span>Signed in as {session.email}</span>
+        <button type="button" onClick={logout}>Sign Out</button>
+      </section>
+      {children}
+    </>
   );
 }
 

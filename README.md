@@ -74,6 +74,18 @@ Add these environment variables in Vercel under Project Settings > Environment V
 
 After adding or changing environment variables, redeploy the Vercel project.
 
+### Admin Access For Apartment Editing
+
+The apartment manager on `stays.html` is protected by Vercel serverless authentication. Add these environment variables in Vercel under Project Settings > Environment Variables:
+
+| Name | Example value | Notes |
+| --- | --- | --- |
+| `ADMIN_EMAIL` | `olakunleobademi@gmail.com` | Only this email can sign in unless you change the value. |
+| `ADMIN_PASSWORD` | `password` | Use a stronger password before going live. Do not commit real passwords to GitHub. |
+| `ADMIN_SESSION_SECRET` | long random secret | Used to sign the admin session cookie. |
+
+After adding or changing admin environment variables, redeploy the Vercel project.
+
 ### Production Domains
 
 Add these domains in the Vercel project under Settings > Domains:

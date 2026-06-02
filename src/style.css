@@ -936,6 +936,7 @@ blockquote {
   padding: 28px;
 }
 
+.admin-panel,
 .apartment-manager {
   margin: 28px 0 34px;
   padding: 28px;
@@ -943,6 +944,30 @@ blockquote {
   border-radius: 8px;
   background: #fff;
   box-shadow: 0 14px 38px rgba(7, 27, 52, 0.08);
+}
+
+.admin-session-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 28px 0 0;
+  padding: 14px 18px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 6px;
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--navy);
+  font-weight: 800;
+}
+
+.admin-session-bar button {
+  border: 1px solid rgba(7, 27, 52, 0.18);
+  border-radius: 4px;
+  padding: 9px 12px;
+  color: var(--navy);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 800;
 }
 
 .manager-form {
