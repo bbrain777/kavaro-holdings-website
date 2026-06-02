@@ -94,6 +94,15 @@ vercel dev
 
 Plain `npm run dev` starts the Vite front end only, so the admin API routes will not respond on `localhost:5173`.
 
+For local testing, create `.env.local` with your admin values. This file is ignored by Git and must not be committed:
+
+```text
+ADMIN_EMAIL=olakunleobademi@gmail.com
+ADMIN_PASSWORD=password
+ADMIN_SESSION_SECRET=replace-with-a-local-secret
+SITE_URL=http://127.0.0.1:3000
+```
+
 ### Production Domains
 
 Add these domains in the Vercel project under Settings > Domains:

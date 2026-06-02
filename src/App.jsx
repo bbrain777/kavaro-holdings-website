@@ -1116,7 +1116,14 @@ function PaymentPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(summary),
       });
-      const data = await response.json();
+      const text = await response.text();
+      let data = {};
+
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error('Stripe API is not available on this local server. Use Vercel deployment or run the site with vercel dev.');
+      }
 
       if (!response.ok || !data.url) {
         throw new Error(data.error || 'Unable to start Stripe checkout.');
