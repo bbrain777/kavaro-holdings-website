@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import apartments from '../data/apartments.json';
 import logo from '../logo_kavaro holdings .png';
 import founderPhoto from '../tayo 9.jpeg';
+import founderProfilePhoto from '../tayo 8.jpeg';
 
 const navItems = [
   { label: 'Home', href: 'index.html' },
@@ -461,7 +462,7 @@ function AboutSummary() {
 function AuthorProfileCard({ compact = false }) {
   return (
     <article className={`author-profile ${compact ? 'author-profile-compact' : ''}`} itemScope itemType="https://schema.org/Person">
-      <img src={founderPhoto} alt="Tayo Obademi, software engineer, technology consultant and founder" itemProp="image" />
+      <img src={founderProfilePhoto} alt="Tayo Obademi, software engineer, technology consultant and founder" itemProp="image" />
       <div>
         <span className="section-kicker">Founder Profile</span>
         <h3 itemProp="name">Tayo Obademi</h3>
