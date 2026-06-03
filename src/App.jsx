@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import apartments from '../data/apartments.json';
 import logo from '../logo_kavaro holdings .png';
-import founderPhoto from '../Tayo 2.jpeg';
+import founderPhoto from '../tayo 9.jpeg';
 
 const navItems = [
   { label: 'Home', href: 'index.html' },
