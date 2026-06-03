@@ -40,7 +40,7 @@ This project is a Vite React website.
 
 ### Vercel Project Settings
 
-- GitHub repository: `bbrain777/KAVARO-HOLDINGS-LTD`
+- GitHub repository: `bbrain777/kavaro-holdings-website`
 - Vercel project name: `kavaro-holdings-website`
 - Framework preset: `Vite`
 - Build command: `npm run build`
@@ -50,7 +50,7 @@ This project is a Vite React website.
 ### Import To Vercel
 
 1. Go to https://vercel.com/new.
-2. Choose the GitHub repository `bbrain777/KAVARO-HOLDINGS-LTD`.
+2. Choose the GitHub repository `bbrain777/kavaro-holdings-website`.
 3. Set the project name to `kavaro-holdings-website`.
 4. Keep the Vite defaults:
 - Build command: `npm run build`
