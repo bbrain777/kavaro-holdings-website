@@ -182,7 +182,7 @@ Either set `availabilityStatus` to `Unavailable` or remove the full apartment ob
 
 The booking form validates required fields, prevents checkout dates before check-in dates, calculates nights, calculates the total cost, saves the booking summary to `localStorage`, and sends the guest to `payment.html`.
 
-Payments are not active yet. Debit/Credit Card, PayPal, Bank Transfer, Stripe, Paystack and Flutterwave buttons are placeholders marked `Payment integration pending`.
+The payment page shows a single Debit/Credit Card option. When Stripe is configured in Vercel, guests continue to Stripe Checkout to enter card details securely. KAVARO does not store card numbers.
 
 ## Future Upgrade Plan
 

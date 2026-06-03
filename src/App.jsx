@@ -1140,7 +1140,7 @@ function PaymentPage() {
       <PageHero
         kicker="Payment"
         title="Secure card payment with Stripe."
-        text="Review the booking summary, then continue to Stripe Checkout for UK card payment. Other payment methods remain prepared for future integration."
+        text="Review the booking summary, then continue to Stripe Checkout to enter card details securely."
       />
       <section className="section intro-section">
         <div className="container payment-grid">
@@ -1164,14 +1164,9 @@ function PaymentPage() {
           <div className="payment-options">
             <button type="button" className="payment-option payment-option-active" onClick={startStripeCheckout}>
               <strong>Debit/Credit Card</strong>
-              <span>Pay securely with Stripe Checkout</span>
+              <span>Continue to secure card payment</span>
             </button>
-            {['PayPal', 'Bank Transfer', 'Paystack placeholder', 'Flutterwave placeholder'].map((option) => (
-              <button type="button" className="payment-option" key={option}>
-                <strong>{option}</strong>
-                <span>Payment integration pending</span>
-              </button>
-            ))}
+            <p className="payment-note">Card details are entered securely on Stripe. KAVARO does not store card numbers.</p>
             {paymentStatus && <p className="form-status">{paymentStatus}</p>}
           </div>
         </div>
