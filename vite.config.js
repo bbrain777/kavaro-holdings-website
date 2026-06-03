@@ -20,6 +20,7 @@ export default defineConfig({
         payment: resolve(__dirname, 'payment.html'),
         investments: resolve(__dirname, 'investments.html'),
         csr: resolve(__dirname, 'csr.html'),
+        founder: resolve(__dirname, 'founder.html'),
         references: resolve(__dirname, 'references.html'),
         contact: resolve(__dirname, 'contact.html'),
       },

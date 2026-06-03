@@ -27,6 +27,14 @@ const navItems = [
   { label: 'CSR', href: 'csr.html' },
 ];
 
+const founderLinks = {
+  portfolio: 'founder.html',
+  github: 'https://github.com/bbrain777',
+  linkedin: 'https://www.linkedin.com/in/tayoobademi',
+  techVideos: 'https://www.youtube.com/@TayoObademiTech',
+  zion: 'https://www.zionyouths.org',
+};
+
 const businessCards = [
   {
     title: 'KAVARO Properties',
@@ -442,10 +450,36 @@ function AboutSummary() {
               KAVARO is being built as a premium corporate platform for strategic growth,
               strong partnerships and responsible enterprise leadership.
             </blockquote>
+            <a className="text-link" href="founder.html">View founder profile</a>
           </div>
         </article>
       </div>
     </section>
+  );
+}
+
+function AuthorProfileCard({ compact = false }) {
+  return (
+    <article className={`author-profile ${compact ? 'author-profile-compact' : ''}`} itemScope itemType="https://schema.org/Person">
+      <img src={founderPhoto} alt="Tayo Obademi, software engineer, technology consultant and founder" itemProp="image" />
+      <div>
+        <span className="section-kicker">Founder Profile</span>
+        <h3 itemProp="name">Tayo Obademi</h3>
+        <p itemProp="alternateName">Also known as Olakunle Obademi</p>
+        <p itemProp="jobTitle">Software Engineer | Technology Consultant | Founder & President, KAVARO Holdings Ltd | Founder, Zion Youth Development Initiative</p>
+        <div className="profile-chip-row" aria-label="Founder expertise">
+          {['Software Engineering', 'Technology Consultancy', 'Web Development', 'AI Automation', 'Business Strategy', 'Social Impact'].map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
+        <div className="profile-link-row">
+          <a className="btn btn-primary" href={founderLinks.portfolio}>Founder Profile</a>
+          <a className="btn btn-secondary tech-link" href={founderLinks.github} target="_blank" rel="noreferrer">GitHub</a>
+          <a className="btn btn-secondary tech-link" href={founderLinks.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
+          <a className="btn btn-secondary tech-link" href={founderLinks.zion} target="_blank" rel="noreferrer">Zion YDI</a>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -477,6 +511,93 @@ function AboutPage() {
         </div>
       </section>
       <SocialImpactSection />
+    </>
+  );
+}
+
+function FounderPage() {
+  const expertise = [
+    'Software engineering and modern web application development',
+    'Technology consultancy for businesses, organisations and community projects',
+    'AI automation, workflow improvement and practical digital transformation',
+    'Corporate strategy across property, technology, trading, ventures and investment',
+    'Founder-led social impact through Zion Youth Development Initiative',
+    'Stakeholder communication, documentation, governance and service delivery',
+  ];
+
+  return (
+    <>
+      <PageHero
+        kicker="Founder Profile"
+        title="Tayo Obademi: software engineer, consultant and founder."
+        text="Official profile for Tayo Obademi, also known as Olakunle Obademi, Founder & President of KAVARO Holdings Ltd and Founder of Zion Youth Development Initiative."
+        actions={<><a className="btn btn-primary" href="contact.html">Contact Tayo</a><a className="btn btn-secondary" href={founderLinks.github} target="_blank" rel="noreferrer">View GitHub</a></>}
+      />
+      <section className="section founder-profile-section">
+        <div className="container founder-profile-grid">
+          <AuthorProfileCard />
+          <div className="founder-bio-panel">
+            <span className="section-kicker">Professional Biography</span>
+            <h2>A technology-led founder building corporate and community platforms.</h2>
+            <p>
+              Tayo Obademi is a software engineer, technology consultant and founder focused on building practical digital systems, business platforms and long-term enterprise value. He leads KAVARO Holdings Ltd as Founder & President, bringing together property, technology, trading, ventures, investment and responsible community engagement under one corporate platform.
+            </p>
+            <p>
+              Publicly, Tayo's professional brand is positioned around consultancy, software engineering, digital transformation and founder-led execution. His work connects technical delivery with business strategy, helping organisations present clearly online, structure services, prepare booking/payment workflows and build systems that can grow into larger operational platforms.
+            </p>
+            <p>
+              Tayo is also the Founder of Zion Youth Development Initiative, a social-impact organisation focused on youth empowerment, education support, skills development, community development and humanitarian support. This creates a clear public connection between Tayo Obademi, KAVARO Holdings Ltd and Zion Youth Development Initiative.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section className="section intro-section">
+        <div className="container service-grid">
+          {expertise.map((item) => (
+            <article className="service-card" key={item}>
+              <h3>{item.split(' ').slice(0, 3).join(' ')}</h3>
+              <p>{item}.</p>
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className="section investments">
+        <div className="container profile-links founder-links-panel">
+          <div className="copy-block">
+            <span className="section-kicker">Online Search Identity</span>
+            <h2>Tayo Obademi, Olakunle Obademi, KAVARO and Zion in one place.</h2>
+            <p>
+              This profile is structured to help search engines associate both public name variations with the same founder identity, KAVARO Holdings Ltd, Zion Youth Development Initiative, software engineering and technology consultancy.
+            </p>
+          </div>
+          <a className="btn btn-primary" href={founderLinks.portfolio}>Portfolio</a>
+          <a className="btn btn-secondary tech-link" href={founderLinks.github} target="_blank" rel="noreferrer">GitHub</a>
+          <a className="btn btn-secondary tech-link" href={founderLinks.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
+          <a className="btn btn-secondary tech-link" href={founderLinks.techVideos} target="_blank" rel="noreferrer">Tech Videos</a>
+          <a className="btn btn-secondary tech-link" href={founderLinks.zion} target="_blank" rel="noreferrer">Zion Youths</a>
+        </div>
+      </section>
+      <section className="section contact">
+        <div className="container contact-grid">
+          <div className="copy-block">
+            <span className="section-kicker">Contact Details</span>
+            <h2>Professional enquiries.</h2>
+            <div className="contact-details">
+              <p><strong>Email</strong><a href="mailto:olakunleobademi@gmail.com">olakunleobademi@gmail.com</a></p>
+              <p><strong>Phone</strong><a href="tel:+447307339657">+44 7307 339657</a></p>
+              <p><strong>Website</strong><a href="https://www.kavaroholdings.com">www.kavaroholdings.com</a></p>
+              <p><strong>Address</strong>40 Stainsby Street, Thornaby, TS17 6HP</p>
+            </div>
+          </div>
+          <div className="investment-panel">
+            <h3>LinkedIn positioning preview</h3>
+            <p><strong>Headline:</strong> Software Engineer | Technology Consultant | Founder & President, KAVARO Holdings Ltd | Founder, Zion Youth Development Initiative</p>
+            <p><strong>Public perception:</strong> consultant, builder and founder serving clients, partners and community-impact projects.</p>
+            <p><strong>Search terms:</strong> Tayo Obademi, Olakunle Obademi, KAVARO Holdings Ltd, Zion Youth Development Initiative, software engineer, technology consultant.</p>
+            <p><strong>Proof links:</strong> LinkedIn profile, GitHub portfolio and Tayo Obademi Tech video channel.</p>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
@@ -547,11 +668,12 @@ function TechnologiesPage() {
           <div className="copy-block">
             <span className="section-kicker">Online Profiles</span>
             <h2>Portfolio, GitHub and LinkedIn.</h2>
-            <p>Replace # with Tayo Obademi's real portfolio, GitHub and LinkedIn links when available.</p>
+            <p>Tayo Obademi's founder profile is the public portfolio hub for software engineering, technology consultancy, KAVARO Holdings Ltd and Zion Youth Development Initiative.</p>
           </div>
-          <a className="btn btn-primary" href="#">Portfolio</a>
-          <a className="btn btn-secondary tech-link" href="#">GitHub</a>
-          <a className="btn btn-secondary tech-link" href="#">LinkedIn</a>
+          <a className="btn btn-primary" href={founderLinks.portfolio}>Portfolio</a>
+          <a className="btn btn-secondary tech-link" href={founderLinks.github} target="_blank" rel="noreferrer">GitHub</a>
+          <a className="btn btn-secondary tech-link" href={founderLinks.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
+          <a className="btn btn-secondary tech-link" href={founderLinks.techVideos} target="_blank" rel="noreferrer">Tech Videos</a>
         </div>
       </section>
     </>
@@ -1372,9 +1494,11 @@ function Footer() {
         <div>
           <img src={logo} alt="KAVARO Holdings Ltd" />
           <p>KAVARO Holdings Ltd is the digital headquarters for a premium diversified corporate group spanning property, technology, trade and investment.</p>
+          <a className="text-link footer-founder-link" href="founder.html">Tayo Obademi, Founder & President</a>
         </div>
         <nav className="footer-nav" aria-label="Footer navigation">
           {navItems.map((item) => <a key={item.href} href={item.href}>{item.label}</a>)}
+          <a href="founder.html">Founder</a>
         </nav>
       </div>
       <div className="container footer-bottom">
@@ -1425,6 +1549,7 @@ function App() {
     'payment.html': <PaymentPage />,
     'investments.html': <InvestmentsPage />,
     'csr.html': <CsrPage />,
+    'founder.html': <FounderPage />,
     'references.html': <ReferencesPage />,
     'contact.html': <ContactPage />,
   }[page] || <HomePage animateStats={animateStats} statsRef={statsRef} />;
