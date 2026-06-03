@@ -137,6 +137,13 @@ function loadCustomApartments() {
   }
 }
 
+async function readApiJson(response) {
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : {};
+  if (!response.ok) throw new Error(data.error || 'Request failed.');
+  return data;
+}
+
 function normalizeApartment(form) {
   const images = [...form.images, form.imageUrl].filter(Boolean);
 
@@ -180,16 +187,94 @@ function apartmentToForm(apartment) {
 
 function useApartmentListings() {
   const [customApartments, setCustomApartments] = useState(() => loadCustomApartments());
+  const [storageMode, setStorageMode] = useState('loading');
+  const [storageMessage, setStorageMessage] = useState('Loading saved listings...');
 
-  const saveCustomApartments = (nextApartments) => {
+  const saveBrowserApartments = (nextApartments) => {
     setCustomApartments(nextApartments);
     localStorage.setItem(apartmentStorageKey, JSON.stringify(nextApartments));
+  };
+
+  useEffect(() => {
+    let active = true;
+
+    fetch('/api/apartments')
+      .then(readApiJson)
+      .then((data) => {
+        if (!active) return;
+        setStorageMode(data.configured ? 'database' : 'browser');
+        setStorageMessage(data.configured
+          ? 'Listings are connected to Vercel Postgres.'
+          : 'Database is not configured yet. Admin changes save only in this browser for now.');
+        if (data.configured) {
+          setCustomApartments(data.apartments || []);
+          localStorage.setItem(apartmentStorageKey, JSON.stringify(data.apartments || []));
+        }
+      })
+      .catch((error) => {
+        if (!active) return;
+        setStorageMode('browser');
+        setStorageMessage(`${error.message} Changes will save only in this browser until the database is configured.`);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const saveCustomApartment = async (apartment) => {
+    try {
+      const data = await fetch('/api/admin-apartments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(apartment),
+      }).then(readApiJson);
+
+      saveBrowserApartments(data.apartments || []);
+      setStorageMode('database');
+      setStorageMessage('Listings are connected to Vercel Postgres.');
+      return { mode: 'database', apartments: data.apartments || [] };
+    } catch (error) {
+      const nextApartments = customApartments.some((item) => item.id === apartment.id)
+        ? customApartments.map((item) => (item.id === apartment.id ? apartment : item))
+        : [...customApartments, apartment];
+      saveBrowserApartments(nextApartments);
+      setStorageMode('browser');
+      setStorageMessage(`${error.message} Saved only in this browser until Vercel Postgres is configured.`);
+      return { mode: 'browser', error: error.message, apartments: nextApartments };
+    }
+  };
+
+  const deleteCustomApartment = async (apartmentId) => {
+    try {
+      const data = await fetch('/api/admin-apartments', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ id: apartmentId }),
+      }).then(readApiJson);
+
+      saveBrowserApartments(data.apartments || []);
+      setStorageMode('database');
+      setStorageMessage('Listings are connected to Vercel Postgres.');
+      return { mode: 'database', apartments: data.apartments || [] };
+    } catch (error) {
+      const nextApartments = customApartments.filter((item) => item.id !== apartmentId);
+      saveBrowserApartments(nextApartments);
+      setStorageMode('browser');
+      setStorageMessage(`${error.message} Removed only from this browser until Vercel Postgres is configured.`);
+      return { mode: 'browser', error: error.message, apartments: nextApartments };
+    }
   };
 
   return {
     listings: useMemo(() => [...apartments, ...customApartments], [customApartments]),
     customApartments,
-    saveCustomApartments,
+    saveCustomApartment,
+    deleteCustomApartment,
+    storageMode,
+    storageMessage,
   };
 }
 
@@ -773,7 +858,14 @@ function ApartmentGrid({ apartments: items }) {
 }
 
 function StaysPage() {
-  const { listings, customApartments, saveCustomApartments } = useApartmentListings();
+  const {
+    listings,
+    customApartments,
+    saveCustomApartment,
+    deleteCustomApartment,
+    storageMode,
+    storageMessage,
+  } = useApartmentListings();
   const [filters, setFilters] = useState({
     location: '',
     maxPrice: '',
@@ -805,7 +897,13 @@ function StaysPage() {
         <div className="container">
           <ApartmentFilters filters={filters} setFilters={setFilters} />
           <AdminGate>
-            <ApartmentManager customApartments={customApartments} saveCustomApartments={saveCustomApartments} />
+            <ApartmentManager
+              customApartments={customApartments}
+              saveCustomApartment={saveCustomApartment}
+              deleteCustomApartment={deleteCustomApartment}
+              storageMode={storageMode}
+              storageMessage={storageMessage}
+            />
           </AdminGate>
           <ApartmentGrid apartments={filteredApartments} />
           <LegalNotices />
@@ -934,9 +1032,10 @@ function AdminGate({ children }) {
   );
 }
 
-function ApartmentManager({ customApartments, saveCustomApartments }) {
+function ApartmentManager({ customApartments, saveCustomApartment, deleteCustomApartment, storageMode, storageMessage }) {
   const [form, setForm] = useState(emptyApartmentForm);
   const [status, setStatus] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const update = (event) => {
     const { name, value } = event.target;
@@ -947,18 +1046,43 @@ function ApartmentManager({ customApartments, saveCustomApartments }) {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
-    const imageData = await Promise.all(files.map((file) => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    })));
+    setStatus('Uploading apartment photo...');
 
-    setForm((current) => ({ ...current, images: [...current.images, ...imageData] }));
-    event.target.value = '';
+    try {
+      const imageData = await Promise.all(files.map(async (file) => {
+        try {
+          const data = await fetch('/api/admin-upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': file.type || 'application/octet-stream',
+              'X-File-Name': file.name,
+            },
+            credentials: 'same-origin',
+            body: file,
+          }).then(readApiJson);
+
+          return data.url;
+        } catch {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        }
+      }));
+
+      setForm((current) => ({ ...current, images: [...current.images, ...imageData] }));
+      setStatus(imageData.some((image) => String(image).startsWith('data:'))
+        ? 'Photo added in browser-only mode. Configure Vercel Blob for permanent image URLs.'
+        : 'Photo uploaded to Vercel Blob.');
+      event.target.value = '';
+    } catch (error) {
+      setStatus(error.message || 'Unable to upload photo.');
+    }
   };
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     setStatus('');
 
@@ -967,14 +1091,18 @@ function ApartmentManager({ customApartments, saveCustomApartments }) {
       return;
     }
 
+    setSaving(true);
     const apartment = normalizeApartment(form);
-    const nextApartments = customApartments.some((item) => item.id === apartment.id)
-      ? customApartments.map((item) => (item.id === apartment.id ? apartment : item))
-      : [...customApartments, apartment];
 
-    saveCustomApartments(nextApartments);
-    setForm(emptyApartmentForm);
-    setStatus(`${apartment.apartmentName} has been saved.`);
+    try {
+      const result = await saveCustomApartment(apartment);
+      setForm(emptyApartmentForm);
+      setStatus(result.mode === 'database'
+        ? `${apartment.apartmentName} has been saved to the database.`
+        : `${apartment.apartmentName} has been saved only in this browser. ${result.error || ''}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const editApartment = (apartment) => {
@@ -982,10 +1110,14 @@ function ApartmentManager({ customApartments, saveCustomApartments }) {
     setStatus(`Editing ${apartment.apartmentName}.`);
   };
 
-  const deleteApartment = (apartmentId) => {
-    saveCustomApartments(customApartments.filter((item) => item.id !== apartmentId));
+  const deleteApartment = async (apartmentId) => {
+    setSaving(true);
+    const result = await deleteCustomApartment(apartmentId);
     if (form.id === apartmentId) setForm(emptyApartmentForm);
-    setStatus('Apartment removed from the front-end list.');
+    setStatus(result.mode === 'database'
+      ? 'Apartment removed from the database.'
+      : `Apartment removed only from this browser. ${result.error || ''}`);
+    setSaving(false);
   };
 
   const removeImage = (image) => {
@@ -997,7 +1129,8 @@ function ApartmentManager({ customApartments, saveCustomApartments }) {
       <div className="section-header align-left">
         <span className="section-kicker">Apartment Manager</span>
         <h2>Create or edit guest-ready listings.</h2>
-        <p>Saved listings appear immediately on this page, the details page and booking page in this browser.</p>
+        <p>{storageMessage}</p>
+        <p><strong>Storage mode:</strong> {storageMode === 'database' ? 'Vercel Postgres database' : 'Browser-only fallback'}</p>
       </div>
       <form className="manager-form" onSubmit={submit} noValidate>
         <div className="form-row">
@@ -1050,8 +1183,8 @@ function ApartmentManager({ customApartments, saveCustomApartments }) {
           </div>
         )}
         <div className="manager-actions">
-          <button className="btn btn-primary" type="submit">{form.id ? 'Update Apartment' : 'Create Apartment'}</button>
-          <button className="btn btn-secondary tech-link" type="button" onClick={() => setForm(emptyApartmentForm)}>Clear Form</button>
+          <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? 'Saving...' : (form.id ? 'Update Apartment' : 'Create Apartment')}</button>
+          <button className="btn btn-secondary tech-link" type="button" onClick={() => setForm(emptyApartmentForm)} disabled={saving}>Clear Form</button>
         </div>
         {status && <p className="form-status">{status}</p>}
       </form>
@@ -1063,8 +1196,8 @@ function ApartmentManager({ customApartments, saveCustomApartments }) {
                 <strong>{apartment.apartmentName}</strong>
                 <span>{apartment.location}</span>
               </div>
-              <button type="button" onClick={() => editApartment(apartment)}>Edit</button>
-              <button type="button" onClick={() => deleteApartment(apartment.id)}>Delete</button>
+              <button type="button" onClick={() => editApartment(apartment)} disabled={saving}>Edit</button>
+              <button type="button" onClick={() => deleteApartment(apartment.id)} disabled={saving}>Delete</button>
             </article>
           ))}
         </div>

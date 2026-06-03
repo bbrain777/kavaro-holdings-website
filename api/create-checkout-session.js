@@ -1,10 +1,5 @@
 import Stripe from 'stripe';
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const apartmentsPath = resolve(dirname(fileURLToPath(import.meta.url)), '../data/apartments.json');
-const apartments = JSON.parse(readFileSync(apartmentsPath, 'utf8'));
+import { getAllApartments } from './_apartments-db.js';
 
 function getOrigin(req) {
   return process.env.SITE_URL || req.headers.origin || `https://${req.headers.host}`;
@@ -49,6 +44,7 @@ export default async function handler(req, res) {
     const summary = await parseRequestBody(req);
     const requestedApartment = summary?.apartment;
     const guest = summary?.guest;
+    const apartments = await getAllApartments();
     const apartment = apartments.find((item) => item.id === requestedApartment?.id);
     const nights = nightsBetween(guest?.checkIn, guest?.checkOut);
     const totalAmount = nights * Number(apartment?.pricePerNight || 0) + Number(apartment?.cleaningFee || 0) + Number(apartment?.securityDeposit || 0);

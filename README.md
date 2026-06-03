@@ -103,6 +103,42 @@ ADMIN_SESSION_SECRET=replace-with-a-local-secret
 SITE_URL=http://127.0.0.1:3000
 ```
 
+### Persistent Apartment Listings With Vercel Storage
+
+The front-end apartment manager now supports persistent listings through Vercel serverless APIs.
+
+Use:
+
+- Vercel Postgres/Neon integration for apartment listing data.
+- Vercel Blob for apartment photo uploads.
+
+In Vercel, add the database and blob storage integrations to the `kavaro-holdings-website` project. Vercel should provide environment variables similar to:
+
+```text
+POSTGRES_URL=...
+POSTGRES_PRISMA_URL=...
+POSTGRES_URL_NON_POOLING=...
+POSTGRES_USER=...
+POSTGRES_HOST=...
+POSTGRES_PASSWORD=...
+POSTGRES_DATABASE=...
+BLOB_READ_WRITE_TOKEN=...
+```
+
+The site uses these API routes:
+
+```text
+api/apartments.js
+api/admin-apartments.js
+api/admin-upload.js
+```
+
+If database variables are missing, the admin editor falls back to browser `localStorage`. In fallback mode, listings appear only in the current browser and may disappear if browser storage is cleared. Once Vercel Postgres is configured, admin-created listings are saved in the database and appear for all visitors.
+
+If `BLOB_READ_WRITE_TOKEN` is missing, uploaded photos fall back to browser-only data URLs. For production, configure Vercel Blob so photos are stored as permanent public URLs.
+
+Stripe checkout also reads database-created apartments, so custom listings can be priced server-side after the database is configured.
+
 ### Production Domains
 
 Add these domains in the Vercel project under Settings > Domains:
