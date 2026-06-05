@@ -33,6 +33,8 @@ export function normalizeApartmentRow(row) {
     images: row.images || [],
     houseRules: row.house_rules || [],
     cancellationPolicy: row.cancellation_policy,
+    ownerId: row.owner_id || '',
+    ownerEmail: row.owner_email || '',
     isCustom: true,
   };
 }
@@ -68,18 +70,35 @@ export async function ensureApartmentTable() {
     )
   `;
 
+  await sql`
+    ALTER TABLE kavaro_apartments
+    ADD COLUMN IF NOT EXISTS owner_id UUID
+  `;
+
+  await sql`
+    ALTER TABLE kavaro_apartments
+    ADD COLUMN IF NOT EXISTS owner_email TEXT
+  `;
+
   return true;
 }
 
-export async function getDatabaseApartments() {
+export async function getDatabaseApartments(session = null) {
   if (!hasDatabase()) return [];
 
   await ensureApartmentTable();
-  const { rows } = await sql`
-    SELECT *
-    FROM kavaro_apartments
-    ORDER BY updated_at DESC
-  `;
+  const { rows } = session?.role === 'staff'
+    ? await sql`
+        SELECT *
+        FROM kavaro_apartments
+        WHERE owner_id = ${session.id}
+        ORDER BY updated_at DESC
+      `
+    : await sql`
+        SELECT *
+        FROM kavaro_apartments
+        ORDER BY updated_at DESC
+      `;
   return rows.map(normalizeApartmentRow);
 }
 
@@ -88,16 +107,33 @@ export async function getAllApartments() {
   return [...defaultApartments, ...databaseApartments];
 }
 
-export async function saveDatabaseApartment(apartment) {
+export async function getDatabaseApartmentById(apartmentId) {
+  if (!hasDatabase()) return null;
+
+  await ensureApartmentTable();
+  const { rows } = await sql`
+    SELECT *
+    FROM kavaro_apartments
+    WHERE id = ${apartmentId}
+    LIMIT 1
+  `;
+  return rows[0] ? normalizeApartmentRow(rows[0]) : null;
+}
+
+export async function saveDatabaseApartment(apartment, session = null) {
   if (!hasDatabase()) throw new Error('Database is not configured yet.');
 
   await ensureApartmentTable();
+  const existingApartment = await getDatabaseApartmentById(apartment.id);
+  const ownerId = existingApartment?.ownerId || session?.id || null;
+  const ownerEmail = existingApartment?.ownerEmail || session?.email || '';
+
   await sql`
     INSERT INTO kavaro_apartments (
       id, apartment_name, location, address_area, short_description, full_description,
       price_per_night, price_per_week, price_per_month, cleaning_fee, security_deposit,
       max_guests, bedrooms, bathrooms, property_type, availability_status, available_dates,
-      amenities, images, house_rules, cancellation_policy, updated_at
+      amenities, images, house_rules, cancellation_policy, owner_id, owner_email, updated_at
     )
     VALUES (
       ${apartment.id}, ${apartment.apartmentName}, ${apartment.location}, ${apartment.addressArea || ''},
@@ -107,7 +143,8 @@ export async function saveDatabaseApartment(apartment) {
       ${apartment.bedrooms || 1}, ${apartment.bathrooms || 1}, ${apartment.propertyType || ''},
       ${apartment.availabilityStatus || 'Available'}, ${JSON.stringify(apartment.availableDates || [])}::jsonb,
       ${JSON.stringify(apartment.amenities || [])}::jsonb, ${JSON.stringify(apartment.images || [])}::jsonb,
-      ${JSON.stringify(apartment.houseRules || [])}::jsonb, ${apartment.cancellationPolicy || ''}, NOW()
+      ${JSON.stringify(apartment.houseRules || [])}::jsonb, ${apartment.cancellationPolicy || ''},
+      ${ownerId}, ${ownerEmail}, NOW()
     )
     ON CONFLICT (id) DO UPDATE SET
       apartment_name = EXCLUDED.apartment_name,
@@ -130,6 +167,8 @@ export async function saveDatabaseApartment(apartment) {
       images = EXCLUDED.images,
       house_rules = EXCLUDED.house_rules,
       cancellation_policy = EXCLUDED.cancellation_policy,
+      owner_id = EXCLUDED.owner_id,
+      owner_email = EXCLUDED.owner_email,
       updated_at = NOW()
   `;
 

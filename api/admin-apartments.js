@@ -1,9 +1,9 @@
-import { getAdminSession, parseJsonBody } from './_admin-auth.js';
-import { deleteDatabaseApartment, getDatabaseApartments, hasDatabase, saveDatabaseApartment } from './_apartments-db.js';
+import { getAdminSession, hasRole, parseJsonBody } from './_admin-auth.js';
+import { deleteDatabaseApartment, getDatabaseApartmentById, getDatabaseApartments, hasDatabase, saveDatabaseApartment } from './_apartments-db.js';
 
 export default async function handler(req, res) {
   const session = getAdminSession(req);
-  if (!session) return res.status(401).json({ error: 'Admin access required.' });
+  if (!hasRole(session, ['admin', 'staff'])) return res.status(401).json({ error: 'Staff or admin access required.' });
 
   if (!hasDatabase()) {
     return res.status(500).json({ error: 'Database is not configured yet. Add Vercel Postgres environment variables first.' });
@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      const apartments = await getDatabaseApartments();
+      const apartments = await getDatabaseApartments(session);
       return res.status(200).json({ apartments });
     }
 
@@ -21,8 +21,13 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Apartment name and location are required.' });
       }
 
-      await saveDatabaseApartment(apartment);
-      const apartments = await getDatabaseApartments();
+      const existingApartment = await getDatabaseApartmentById(apartment.id);
+      if (session.role === 'staff' && existingApartment && existingApartment.ownerId !== session.id) {
+        return res.status(403).json({ error: 'Staff can only edit rentals they created.' });
+      }
+
+      await saveDatabaseApartment(apartment, session);
+      const apartments = await getDatabaseApartments(session);
       return res.status(200).json({ apartment, apartments });
     }
 
@@ -30,8 +35,13 @@ export default async function handler(req, res) {
       const { id } = await parseJsonBody(req);
       if (!id) return res.status(400).json({ error: 'Apartment ID is required.' });
 
+      const existingApartment = await getDatabaseApartmentById(id);
+      if (session.role === 'staff' && existingApartment?.ownerId !== session.id) {
+        return res.status(403).json({ error: 'Staff can only delete rentals they created.' });
+      }
+
       await deleteDatabaseApartment(id);
-      const apartments = await getDatabaseApartments();
+      const apartments = await getDatabaseApartments(session);
       return res.status(200).json({ apartments });
     }
 

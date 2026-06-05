@@ -1,5 +1,5 @@
 import { put } from '@vercel/blob';
-import { getAdminSession } from './_admin-auth.js';
+import { getAdminSession, hasRole } from './_admin-auth.js';
 
 export const config = {
   api: {
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   }
 
   const session = getAdminSession(req);
-  if (!session) return res.status(401).json({ error: 'Admin access required.' });
+  if (!hasRole(session, ['admin', 'staff'])) return res.status(401).json({ error: 'Staff or admin access required.' });
 
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return res.status(500).json({ error: 'Vercel Blob is not configured yet.' });

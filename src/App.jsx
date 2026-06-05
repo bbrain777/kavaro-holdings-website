@@ -897,13 +897,30 @@ function StaysPage() {
         <div className="container">
           <ApartmentFilters filters={filters} setFilters={setFilters} />
           <AdminGate>
-            <ApartmentManager
-              customApartments={customApartments}
-              saveCustomApartment={saveCustomApartment}
-              deleteCustomApartment={deleteCustomApartment}
-              storageMode={storageMode}
-              storageMessage={storageMessage}
-            />
+            {(session) => (
+              <>
+                <AccountSecurity session={session} />
+                {session.role === 'admin' && <UserManager />}
+                {['admin', 'staff'].includes(session.role) ? (
+                  <ApartmentManager
+                    session={session}
+                    customApartments={customApartments}
+                    saveCustomApartment={saveCustomApartment}
+                    deleteCustomApartment={deleteCustomApartment}
+                    storageMode={storageMode}
+                    storageMessage={storageMessage}
+                  />
+                ) : (
+                  <section className="admin-panel">
+                    <div className="section-header align-left">
+                      <span className="section-kicker">My Account</span>
+                      <h2>Your KAVARO account is active.</h2>
+                      <p>Guest users can view their own account details. Booking history will appear here when saved bookings are connected.</p>
+                    </div>
+                  </section>
+                )}
+              </>
+            )}
           </AdminGate>
           <ApartmentGrid apartments={filteredApartments} />
           <LegalNotices />
@@ -935,8 +952,11 @@ function ApartmentFilters({ filters, setFilters }) {
 }
 
 function AdminGate({ children }) {
-  const [session, setSession] = useState({ loading: true, authenticated: false, email: '' });
+  const [session, setSession] = useState({ loading: true, authenticated: false, email: '', role: '' });
   const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [signup, setSignup] = useState({ fullName: '', email: '', phone: '', password: '' });
+  const [reset, setReset] = useState({ email: '', code: '', newPassword: '', confirmPassword: '' });
+  const [authMode, setAuthMode] = useState('login');
   const [status, setStatus] = useState('');
 
   const readApiResponse = async (response) => {
@@ -953,13 +973,30 @@ function AdminGate({ children }) {
   useEffect(() => {
     fetch('/api/admin-session')
       .then(readApiResponse)
-      .then((data) => setSession({ loading: false, authenticated: Boolean(data.authenticated), email: data.email || '' }))
-      .catch(() => setSession({ loading: false, authenticated: false, email: '' }));
+      .then((data) => setSession({
+        loading: false,
+        authenticated: Boolean(data.authenticated),
+        email: data.email || '',
+        fullName: data.fullName || '',
+        role: data.role || '',
+        id: data.id || '',
+      }))
+      .catch(() => setSession({ loading: false, authenticated: false, email: '', role: '' }));
   }, []);
 
   const update = (event) => {
     const { name, value } = event.target;
     setCredentials((current) => ({ ...current, [name]: value }));
+  };
+
+  const updateSignup = (event) => {
+    const { name, value } = event.target;
+    setSignup((current) => ({ ...current, [name]: value }));
+  };
+
+  const updateReset = (event) => {
+    const { name, value } = event.target;
+    setReset((current) => ({ ...current, [name]: value }));
   };
 
   const login = async (event) => {
@@ -978,7 +1015,13 @@ function AdminGate({ children }) {
         throw new Error(data.error || 'Admin access denied.');
       }
 
-      setSession({ loading: false, authenticated: true, email: data.email });
+      setSession({
+        loading: false,
+        authenticated: true,
+        email: data.email,
+        fullName: data.fullName || '',
+        role: data.role || '',
+      });
       setCredentials({ email: '', password: '' });
       setStatus('');
     } catch (error) {
@@ -986,9 +1029,80 @@ function AdminGate({ children }) {
     }
   };
 
+  const createAccount = async (event) => {
+    event.preventDefault();
+    setStatus('Creating account...');
+
+    try {
+      const response = await fetch('/api/account-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(signup),
+      });
+      const data = await readApiResponse(response);
+
+      if (!response.ok || !data.authenticated) {
+        throw new Error(data.error || 'Unable to create account.');
+      }
+
+      setSession({
+        loading: false,
+        authenticated: true,
+        email: data.user.email,
+        fullName: data.user.fullName,
+        role: data.user.role,
+        id: data.user.id,
+      });
+      setSignup({ fullName: '', email: '', phone: '', password: '' });
+      setStatus('');
+    } catch (error) {
+      setStatus(error.message);
+    }
+  };
+
+  const requestOtp = async (event) => {
+    event.preventDefault();
+    setStatus('Requesting OTP...');
+
+    try {
+      const response = await fetch('/api/account-request-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: reset.email }),
+      });
+      const data = await readApiResponse(response);
+      if (!response.ok) throw new Error(data.error || 'Unable to request OTP.');
+      setStatus(data.emailConfigured
+        ? data.message
+        : `${data.message} Email delivery is not configured yet; connect RESEND_API_KEY in Vercel to send real inbox OTPs.`);
+    } catch (error) {
+      setStatus(error.message);
+    }
+  };
+
+  const resetPassword = async (event) => {
+    event.preventDefault();
+    setStatus('Resetting password...');
+
+    try {
+      const response = await fetch('/api/account-reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reset),
+      });
+      const data = await readApiResponse(response);
+      if (!response.ok) throw new Error(data.error || 'Unable to reset password.');
+      setReset({ email: '', code: '', newPassword: '', confirmPassword: '' });
+      setAuthMode('login');
+      setStatus(data.message);
+    } catch (error) {
+      setStatus(error.message);
+    }
+  };
+
   const logout = async () => {
     await fetch('/api/admin-logout', { method: 'POST' }).catch(() => undefined);
-    setSession({ loading: false, authenticated: false, email: '' });
+    setSession({ loading: false, authenticated: false, email: '', role: '' });
     setStatus('');
   };
 
@@ -1004,19 +1118,55 @@ function AdminGate({ children }) {
     return (
       <section className="admin-panel" aria-label="Admin login">
         <div className="section-header align-left">
-          <span className="section-kicker">Admin Access</span>
-          <h2>Sign in to manage apartment listings.</h2>
-          <p>Only authorised KAVARO administrators can create or edit guest-ready listings.</p>
+          <span className="section-kicker">Account Access</span>
+          <h2>Sign in to manage your KAVARO access.</h2>
+          <p>Admins manage everything, staff manage their own rental listings, and guests manage their own account.</p>
           <p>For local testing, run with Vercel Dev so the admin API routes are available.</p>
         </div>
-        <form className="manager-form" onSubmit={login} noValidate>
-          <div className="form-row">
-            <label>Email<input name="email" type="email" value={credentials.email} onChange={update} required /></label>
-            <label>Password<input name="password" type="password" value={credentials.password} onChange={update} required /></label>
-          </div>
-          <button className="btn btn-primary" type="submit">Admin Sign In</button>
-          {status && <p className="form-status">{status}</p>}
-        </form>
+        <div className="manager-actions">
+          <button className={`btn ${authMode === 'login' ? 'btn-primary' : 'btn-secondary tech-link'}`} type="button" onClick={() => setAuthMode('login')}>Sign In</button>
+          <button className={`btn ${authMode === 'signup' ? 'btn-primary' : 'btn-secondary tech-link'}`} type="button" onClick={() => setAuthMode('signup')}>Create Account</button>
+          <button className={`btn ${authMode === 'reset' ? 'btn-primary' : 'btn-secondary tech-link'}`} type="button" onClick={() => setAuthMode('reset')}>Reset Password</button>
+        </div>
+        {authMode === 'login' && (
+          <form className="manager-form" onSubmit={login} noValidate>
+            <div className="form-row">
+              <label>Email<input name="email" type="email" value={credentials.email} onChange={update} required /></label>
+              <label>Password<input name="password" type="password" value={credentials.password} onChange={update} required /></label>
+            </div>
+            <button className="btn btn-primary" type="submit">Sign In</button>
+          </form>
+        )}
+        {authMode === 'signup' && (
+          <form className="manager-form" onSubmit={createAccount} noValidate>
+            <div className="form-row">
+              <label>Full name<input name="fullName" value={signup.fullName} onChange={updateSignup} required /></label>
+              <label>Email<input name="email" type="email" value={signup.email} onChange={updateSignup} required /></label>
+            </div>
+            <div className="form-row">
+              <label>Phone<input name="phone" value={signup.phone} onChange={updateSignup} /></label>
+              <label>Password<input name="password" type="password" minLength="8" value={signup.password} onChange={updateSignup} required /></label>
+            </div>
+            <button className="btn btn-primary" type="submit">Create User Account</button>
+          </form>
+        )}
+        {authMode === 'reset' && (
+          <form className="manager-form" onSubmit={resetPassword} noValidate>
+            <div className="form-row">
+              <label>Email<input name="email" type="email" value={reset.email} onChange={updateReset} required /></label>
+              <label>OTP code<input name="code" value={reset.code} onChange={updateReset} inputMode="numeric" /></label>
+            </div>
+            <div className="form-row">
+              <label>New password<input name="newPassword" type="password" minLength="8" value={reset.newPassword} onChange={updateReset} required /></label>
+              <label>Confirm password<input name="confirmPassword" type="password" minLength="8" value={reset.confirmPassword} onChange={updateReset} required /></label>
+            </div>
+            <div className="manager-actions">
+              <button className="btn btn-secondary tech-link" type="button" onClick={requestOtp}>Send OTP</button>
+              <button className="btn btn-primary" type="submit">Reset Password</button>
+            </div>
+          </form>
+        )}
+        {status && <p className="form-status">{status}</p>}
       </section>
     );
   }
@@ -1024,15 +1174,168 @@ function AdminGate({ children }) {
   return (
     <>
       <section className="admin-session-bar">
-        <span>Signed in as {session.email}</span>
+        <span>Signed in as {session.email} ({session.role})</span>
         <button type="button" onClick={logout}>Sign Out</button>
       </section>
-      {children}
+      {typeof children === 'function' ? children(session) : children}
     </>
   );
 }
 
-function ApartmentManager({ customApartments, saveCustomApartment, deleteCustomApartment, storageMode, storageMessage }) {
+function AccountSecurity({ session }) {
+  const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [status, setStatus] = useState('');
+
+  const update = (event) => {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setStatus('Changing password...');
+
+    try {
+      const data = await fetch('/api/account-change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(form),
+      }).then(readApiJson);
+
+      setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setStatus(data.message || 'Password changed.');
+    } catch (error) {
+      setStatus(error.message);
+    }
+  };
+
+  return (
+    <section className="admin-panel">
+      <div className="section-header align-left">
+        <span className="section-kicker">Account Security</span>
+        <h2>{session.fullName || session.email}</h2>
+        <p><strong>Role:</strong> {session.role}</p>
+      </div>
+      <form className="manager-form" onSubmit={submit} noValidate>
+        <div className="form-row">
+          <label>Current password<input name="currentPassword" type="password" value={form.currentPassword} onChange={update} required /></label>
+          <label>New password<input name="newPassword" type="password" minLength="8" value={form.newPassword} onChange={update} required /></label>
+        </div>
+        <label>Confirm new password<input name="confirmPassword" type="password" minLength="8" value={form.confirmPassword} onChange={update} required /></label>
+        <button className="btn btn-primary" type="submit">Change Password</button>
+        {status && <p className="form-status">{status}</p>}
+      </form>
+    </section>
+  );
+}
+
+function UserManager() {
+  const [users, setUsers] = useState([]);
+  const [form, setForm] = useState({ fullName: '', email: '', phone: '', role: 'user', password: '' });
+  const [status, setStatus] = useState('Loading users...');
+
+  const loadUsers = () => {
+    fetch('/api/admin-users', { credentials: 'same-origin' })
+      .then(readApiJson)
+      .then((data) => {
+        setUsers(data.users || []);
+        setStatus('');
+      })
+      .catch((error) => setStatus(error.message));
+  };
+
+  useEffect(loadUsers, []);
+
+  const update = (event) => {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setStatus('Saving user...');
+
+    try {
+      const data = await fetch('/api/admin-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(form),
+      }).then(readApiJson);
+
+      setUsers(data.users || []);
+      setForm({ fullName: '', email: '', phone: '', role: 'user', password: '' });
+      setStatus('User saved. If you set a temporary password, ask them to change it after signing in.');
+    } catch (error) {
+      setStatus(error.message);
+    }
+  };
+
+  const changeRole = async (user, role) => {
+    setStatus(`Updating ${user.email}...`);
+
+    try {
+      const data = await fetch('/api/admin-users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ id: user.id, role }),
+      }).then(readApiJson);
+
+      setUsers(data.users || []);
+      setStatus('Role updated.');
+    } catch (error) {
+      setStatus(error.message);
+    }
+  };
+
+  return (
+    <section className="apartment-manager" aria-label="User manager">
+      <div className="section-header align-left">
+        <span className="section-kicker">User & Staff Manager</span>
+        <h2>Assign account roles.</h2>
+        <p>Admins can create users, promote staff, and keep full access across all accounts and rentals.</p>
+      </div>
+      <form className="manager-form" onSubmit={submit} noValidate>
+        <div className="form-row">
+          <label>Full name<input name="fullName" value={form.fullName} onChange={update} required /></label>
+          <label>Email<input name="email" type="email" value={form.email} onChange={update} required /></label>
+        </div>
+        <div className="form-row">
+          <label>Phone<input name="phone" value={form.phone} onChange={update} /></label>
+          <label>Role<select name="role" value={form.role} onChange={update}>
+            <option value="user">User</option>
+            <option value="staff">Staff</option>
+            <option value="admin">Admin</option>
+          </select></label>
+        </div>
+        <label>Temporary password<input name="password" type="password" minLength="8" value={form.password} onChange={update} placeholder="Optional for existing users" /></label>
+        <button className="btn btn-primary" type="submit">Save User</button>
+        {status && <p className="form-status">{status}</p>}
+      </form>
+      {users.length > 0 && (
+        <div className="managed-list">
+          {users.map((user) => (
+            <article key={user.id}>
+              <div>
+                <strong>{user.fullName}</strong>
+                <span>{user.email} - {user.role}</span>
+              </div>
+              <select value={user.role} onChange={(event) => changeRole(user, event.target.value)}>
+                <option value="user">User</option>
+                <option value="staff">Staff</option>
+                <option value="admin">Admin</option>
+              </select>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ApartmentManager({ session, customApartments, saveCustomApartment, deleteCustomApartment, storageMode, storageMessage }) {
   const [form, setForm] = useState(emptyApartmentForm);
   const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);

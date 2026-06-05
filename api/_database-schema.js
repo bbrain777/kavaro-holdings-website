@@ -17,6 +17,11 @@ export async function ensureUserAccountTable() {
     )
   `;
 
+  await sql`
+    ALTER TABLE kavaro_users
+    ADD COLUMN IF NOT EXISTS password_reset_required BOOLEAN DEFAULT FALSE
+  `;
+
   return true;
 }
 
@@ -56,15 +61,39 @@ export async function ensureBookingTable() {
   return true;
 }
 
+export async function ensurePasswordOtpTable() {
+  if (!hasDatabase()) return false;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS kavaro_password_otps (
+      id UUID PRIMARY KEY,
+      user_id UUID NOT NULL REFERENCES kavaro_users(id) ON DELETE CASCADE,
+      code_hash TEXT NOT NULL,
+      purpose TEXT NOT NULL DEFAULT 'password_reset',
+      expires_at TIMESTAMPTZ NOT NULL,
+      used_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE INDEX IF NOT EXISTS kavaro_password_otps_user_id_idx
+    ON kavaro_password_otps(user_id)
+  `;
+
+  return true;
+}
+
 export async function ensureDatabaseSchema() {
   if (!hasDatabase()) return { configured: false, tables: [] };
 
   await ensureApartmentTable();
   await ensureUserAccountTable();
   await ensureBookingTable();
+  await ensurePasswordOtpTable();
 
   return {
     configured: true,
-    tables: ['kavaro_apartments', 'kavaro_users', 'kavaro_bookings'],
+    tables: ['kavaro_apartments', 'kavaro_users', 'kavaro_bookings', 'kavaro_password_otps'],
   };
 }

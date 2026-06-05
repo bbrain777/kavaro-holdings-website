@@ -140,6 +140,7 @@ The setup route creates these tables when they do not already exist:
 | `kavaro_apartments` | Admin-created rental stays/listings. |
 | `kavaro_users` | Future customer accounts. |
 | `kavaro_bookings` | Future booking records connected to apartments and optional users. |
+| `kavaro_password_otps` | Password reset OTP records. |
 
 The site uses these API routes:
 
@@ -148,6 +149,11 @@ api/apartments.js
 api/admin-apartments.js
 api/admin-upload.js
 api/setup-database.js
+api/admin-users.js
+api/account-signup.js
+api/account-change-password.js
+api/account-request-otp.js
+api/account-reset-password.js
 ```
 
 If database variables are missing, the admin editor falls back to browser `localStorage`. In fallback mode, listings appear only in the current browser and may disappear if browser storage is cleared. Once Vercel Postgres is configured, admin-created listings are saved in the database and appear for all visitors.
@@ -155,6 +161,34 @@ If database variables are missing, the admin editor falls back to browser `local
 If `BLOB_READ_WRITE_TOKEN` is missing, uploaded photos fall back to browser-only data URLs. For production, configure Vercel Blob so photos are stored as permanent public URLs.
 
 Stripe checkout also reads database-created apartments, so custom listings can be priced server-side after the database is configured.
+
+### Account Roles And Password Reset
+
+The account system uses `kavaro_users` with three roles:
+
+| Role | Access |
+| --- | --- |
+| `admin` | Full account, role and rental listing management. |
+| `staff` | Create, edit and delete only the rental listings they created. |
+| `user` | Access their own account only. |
+
+The first admin account is bootstrapped from `ADMIN_EMAIL` and `ADMIN_PASSWORD` on first database-backed sign-in. After signing in, the admin can create staff/users and assign roles from `stays.html`.
+
+All signed-in groups can change their own password. Password reset by OTP is available through:
+
+```text
+api/account-request-otp.js
+api/account-reset-password.js
+```
+
+For real email delivery, add these Vercel environment variables:
+
+| Name | Example value | Notes |
+| --- | --- | --- |
+| `RESEND_API_KEY` | `re_...` | Sends password reset OTP emails through Resend. |
+| `OTP_EMAIL_FROM` | `KAVARO Holdings <noreply@kavaroholdings.com>` | Sender address. The domain must be verified with the email provider. |
+
+If `RESEND_API_KEY` is missing, OTPs are created but only logged by the serverless function for development/debugging. They will not arrive in a real inbox until email delivery is configured.
 
 ### Production Domains
 

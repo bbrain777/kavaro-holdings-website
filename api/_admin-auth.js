@@ -25,8 +25,14 @@ function isLocalRequest(req) {
   return String(req.headers.host || '').includes('localhost') || String(req.headers.host || '').includes('127.0.0.1');
 }
 
-export function createSessionCookie(email, req) {
-  const payload = base64Url(JSON.stringify({ email, exp: Date.now() + sessionMaxAge * 1000 }));
+export function createSessionCookie(user, req) {
+  const payload = base64Url(JSON.stringify({
+    id: user.id || '',
+    email: user.email,
+    fullName: user.fullName || user.full_name || '',
+    role: user.role || 'user',
+    exp: Date.now() + sessionMaxAge * 1000,
+  }));
   const token = `${payload}.${sign(payload)}`;
   const secure = isLocalRequest(req) ? '' : '; Secure';
   return `${cookieName}=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${sessionMaxAge}${secure}`;
@@ -56,6 +62,10 @@ export function getAdminSession(req) {
   } catch {
     return null;
   }
+}
+
+export function hasRole(session, allowedRoles) {
+  return Boolean(session && allowedRoles.includes(session.role));
 }
 
 export async function parseJsonBody(req) {
