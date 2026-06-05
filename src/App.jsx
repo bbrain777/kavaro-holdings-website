@@ -1600,9 +1600,25 @@ function BookingPage() {
       return;
     }
 
-    const summary = { apartment, guest: form, nights, total };
-    localStorage.setItem('kavaroBookingSummary', JSON.stringify(summary));
-    window.location.href = 'payment.html';
+    const summary = {
+      apartment: {
+        id: apartment.id,
+        apartmentName: apartment.apartmentName,
+        pricePerNight: apartment.pricePerNight,
+        cleaningFee: apartment.cleaningFee,
+        securityDeposit: apartment.securityDeposit,
+      },
+      guest: form,
+      nights,
+      total,
+    };
+
+    try {
+      localStorage.setItem('kavaroBookingSummary', JSON.stringify(summary));
+      window.location.href = 'payment.html';
+    } catch {
+      setError('Unable to prepare payment summary. Please remove oversized uploaded images from this listing or try again in a fresh browser tab.');
+    }
   };
 
   return (
@@ -1657,8 +1673,12 @@ function PaymentPage() {
   const [paymentStatus, setPaymentStatus] = useState('');
 
   useEffect(() => {
-    const saved = localStorage.getItem('kavaroBookingSummary');
-    if (saved) setSummary(JSON.parse(saved));
+    try {
+      const saved = localStorage.getItem('kavaroBookingSummary');
+      if (saved) setSummary(JSON.parse(saved));
+    } catch {
+      setPaymentStatus('The saved booking summary could not be loaded. Please start again from the booking page.');
+    }
   }, []);
 
   const startStripeCheckout = async () => {
