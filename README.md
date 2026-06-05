@@ -125,12 +125,29 @@ POSTGRES_DATABASE=...
 BLOB_READ_WRITE_TOKEN=...
 ```
 
+Use `vercel-env.example.txt` as the checklist of environment variable names. Never commit real secret values.
+
+After the Postgres variables are added and the project is redeployed:
+
+1. Sign in to the apartment manager on `stays.html`.
+2. Open `/api/setup-database` in the same browser session, or send a `POST` request to `/api/setup-database`.
+3. Confirm the response says `KAVARO Postgres schema is ready.`
+
+The setup route creates these tables when they do not already exist:
+
+| Table | Purpose |
+| --- | --- |
+| `kavaro_apartments` | Admin-created rental stays/listings. |
+| `kavaro_users` | Future customer accounts. |
+| `kavaro_bookings` | Future booking records connected to apartments and optional users. |
+
 The site uses these API routes:
 
 ```text
 api/apartments.js
 api/admin-apartments.js
 api/admin-upload.js
+api/setup-database.js
 ```
 
 If database variables are missing, the admin editor falls back to browser `localStorage`. In fallback mode, listings appear only in the current browser and may disappear if browser storage is cleared. Once Vercel Postgres is configured, admin-created listings are saved in the database and appear for all visitors.
@@ -224,6 +241,8 @@ The payment page shows a single Debit/Credit Card option. When Stripe is configu
 
 - Admin dashboard
 - Real booking calendar
+- Customer account signup and login using `kavaro_users`
+- Saved booking history using `kavaro_bookings`
 - Online payment integration
 - Email confirmation
 - WhatsApp confirmation
