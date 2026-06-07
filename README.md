@@ -83,6 +83,8 @@ The apartment manager on `stays.html` is protected by Vercel serverless authenti
 | `ADMIN_EMAIL` | `olakunleobademi@gmail.com` | Only this email can sign in unless you change the value. |
 | `ADMIN_PASSWORD` | `password` | Use a stronger password before going live. Do not commit real passwords to GitHub. |
 | `ADMIN_SESSION_SECRET` | long random secret | Used to sign the admin session cookie. |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID | Used by API routes to verify Google sign-in ID tokens. |
+| `VITE_GOOGLE_CLIENT_ID` | Same Google OAuth client ID | Used by the browser to render the Google sign-in button. |
 
 After adding or changing admin environment variables, redeploy the Vercel project.
 
@@ -100,6 +102,8 @@ For local testing, create `.env.local` with your admin values. This file is igno
 ADMIN_EMAIL=olakunleobademi@gmail.com
 ADMIN_PASSWORD=password
 ADMIN_SESSION_SECRET=replace-with-a-local-secret
+GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
+VITE_GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
 SITE_URL=http://127.0.0.1:3000
 ```
 
@@ -161,15 +165,19 @@ Stripe checkout also reads database-created apartments, so custom listings can b
 
 ### Account Roles And Password Reset
 
-The account system uses `kavaro_users` with three roles:
+The account system uses `kavaro_users` with these roles:
 
 | Role | Access |
 | --- | --- |
 | `admin` | Full account, role and rental listing management. |
 | `staff` | Create, edit and delete only the rental listings they created. |
+| `partner_pending` | Signed-in user has requested partner access and is waiting for admin approval. |
+| `partner` | Approved partner account. |
 | `user` | Access their own account only. |
 
-The first admin account is bootstrapped from `ADMIN_EMAIL` and `ADMIN_PASSWORD` on first database-backed sign-in. After signing in, the admin can create staff/users and assign roles from `stays.html`.
+The first admin account is bootstrapped from `ADMIN_EMAIL` and `ADMIN_PASSWORD` on first database-backed sign-in. After signing in, the admin can create users, approve partner requests by changing `partner_pending` to `partner`, and assign roles from `stays.html`.
+
+Google sign-in is supported through Google Identity Services. Set both Google client ID environment variables to the same OAuth client ID. Google confirms the user's identity; KAVARO still controls authorization through the database role.
 
 All signed-in groups can change their own password. Password reset by OTP is available through:
 

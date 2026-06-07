@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import apartments from '../data/apartments.json';
 import logo from '../logo_kavaro holdings .png';
-import founderPhoto from '../tayo 9.jpeg';
-import founderProfilePhoto from '../tayo 8.jpeg';
+import founderPhoto from '../images/ty21_founder and CEO .png';
+import founderProfilePhoto from '../images/ty21_founder and CEO .png';
+import partnersMeetingPhoto from '../images/kavaro partners1.png';
+import partnersVenturesPhoto from '../images/kavaro ventures.png';
 
 const navItems = [
   { label: 'Home', href: 'index.html' },
@@ -55,14 +57,14 @@ const businessCards = [
     title: 'KAVARO Trading',
     href: 'trading.html',
     label: 'Trading',
-    image: 'https://images.unsplash.com/photo-1494412685616-a5d310fbb07d?auto=format&fit=crop&w=900&q=80',
+    image: partnersMeetingPhoto,
     description: 'Import/export, wholesale distribution, supply chain partnerships and global trade opportunities.',
   },
   {
     title: 'KAVARO Ventures',
     href: 'ventures.html',
     label: 'Ventures',
-    image: 'https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=900&q=80',
+    image: partnersVenturesPhoto,
     description: 'Strategic partnerships, acquisitions, startup support and investment opportunities.',
   },
 ];
@@ -83,6 +85,14 @@ const bookingNotices = [
   'Guests must follow apartment rules.',
   'Cancellation policy applies.',
   'KAVARO Holdings Ltd reserves the right to approve, decline, or cancel bookings where necessary.',
+];
+
+const contactOptions = [
+  { label: 'Make an Enquiry', href: 'contact.html?type=General' },
+  { label: 'Become a Partner', href: 'contact.html?type=Partnership' },
+  { label: 'Booking Support', href: 'contact.html?type=Apartment%20Booking' },
+  { label: 'Make a Complaint', href: 'contact.html?type=Complaint' },
+  { label: 'Investment Enquiry', href: 'contact.html?type=Investment' },
 ];
 
 const apartmentStorageKey = 'kavaroCustomApartments';
@@ -204,8 +214,8 @@ function useApartmentListings() {
         if (!active) return;
         setStorageMode(data.configured ? 'database' : 'browser');
         setStorageMessage(data.configured
-          ? 'Listings are connected to Vercel Postgres.'
-          : 'Database is not configured yet. Admin changes save only in this browser for now.');
+          ? 'Listing management is ready.'
+          : 'Listing changes are available in this browser session.');
         if (data.configured) {
           setCustomApartments(data.apartments || []);
           localStorage.setItem(apartmentStorageKey, JSON.stringify(data.apartments || []));
@@ -233,7 +243,7 @@ function useApartmentListings() {
 
       saveBrowserApartments(data.apartments || []);
       setStorageMode('database');
-      setStorageMessage('Listings are connected to Vercel Postgres.');
+      setStorageMessage('Listing saved successfully.');
       return { mode: 'database', apartments: data.apartments || [] };
     } catch (error) {
       const nextApartments = customApartments.some((item) => item.id === apartment.id)
@@ -241,7 +251,7 @@ function useApartmentListings() {
         : [...customApartments, apartment];
       saveBrowserApartments(nextApartments);
       setStorageMode('browser');
-      setStorageMessage(`${error.message} Saved only in this browser until Vercel Postgres is configured.`);
+      setStorageMessage('Listing saved for this browser session.');
       return { mode: 'browser', error: error.message, apartments: nextApartments };
     }
   };
@@ -257,13 +267,13 @@ function useApartmentListings() {
 
       saveBrowserApartments(data.apartments || []);
       setStorageMode('database');
-      setStorageMessage('Listings are connected to Vercel Postgres.');
+      setStorageMessage('Listing removed successfully.');
       return { mode: 'database', apartments: data.apartments || [] };
     } catch (error) {
       const nextApartments = customApartments.filter((item) => item.id !== apartmentId);
       saveBrowserApartments(nextApartments);
       setStorageMode('browser');
-      setStorageMessage(`${error.message} Removed only from this browser until Vercel Postgres is configured.`);
+      setStorageMessage('Listing removed from this browser session.');
       return { mode: 'browser', error: error.message, apartments: nextApartments };
     }
   };
@@ -367,9 +377,15 @@ function Header({ menuOpen, setMenuOpen, darkMode, setDarkMode }) {
           <button className="icon-button" type="button" onClick={() => setDarkMode((current) => !current)} aria-label="Toggle dark mode">
             {darkMode ? 'Light' : 'Dark'}
           </button>
-          <a className="btn btn-primary header-cta" href="contact.html">
-            Get in Touch
-          </a>
+          <div className="header-contact-menu">
+            <a className="btn btn-primary header-cta" href="contact.html">Get in Touch</a>
+            <button className="contact-menu-toggle" type="button" aria-label="Open contact options" />
+            <div className="contact-dropdown">
+              {contactOptions.map((item) => (
+                <a key={item.label} href={item.href}>{item.label}</a>
+              ))}
+            </div>
+          </div>
           <button className="nav-toggle" type="button" aria-label="Toggle navigation" onClick={() => setMenuOpen((current) => !current)}>
             <span />
             <span />
@@ -773,7 +789,7 @@ function TradingPage() {
         kicker="KAVARO Trading"
         title="Import/export and supply chain partnerships."
         text="KAVARO Trading is positioned for wholesale distribution, market connectivity and trade opportunities across the UK, Nigeria, the US and Canada."
-        image="https://images.unsplash.com/photo-1494412685616-a5d310fbb07d?auto=format&fit=crop&w=1800&q=85"
+        image={partnersMeetingPhoto}
       />
       <section className="section intro-section">
         <div className="container service-grid">
@@ -796,7 +812,7 @@ function VenturesPage() {
         kicker="KAVARO Ventures"
         title="Strategic partnerships, acquisitions and investment opportunities."
         text="KAVARO Ventures supports business acquisitions, startup support and partnerships that can strengthen the wider KAVARO ecosystem."
-        image="https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=1800&q=85"
+        image={partnersVenturesPhoto}
       />
       <section className="section intro-section">
         <div className="container service-grid">
@@ -822,7 +838,7 @@ function StaysPreview() {
         <div className="section-header align-left">
           <span className="section-kicker">KAVARO Stays</span>
           <h2>Available apartments and serviced accommodation.</h2>
-          <p>Short-stay, long-stay and serviced rental information can be managed from the front-end apartment editor.</p>
+          <p>Explore short-stay, long-stay and serviced accommodation options prepared for KAVARO guests.</p>
         </div>
         <ApartmentGrid apartments={listings.slice(0, 3)} />
       </div>
@@ -890,7 +906,7 @@ function StaysPage() {
       <PageHero
         kicker="KAVARO Stays"
         title="Premium apartment listings and booking preparation."
-        text="Browse available apartments, serviced accommodation and rental properties. Card payments can be handled securely through Stripe when configured in Vercel."
+        text="Browse available apartments, serviced accommodation and rental properties with secure booking preparation."
         image="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1800&q=85"
       />
       <section className="section intro-section">
@@ -910,15 +926,7 @@ function StaysPage() {
                     storageMode={storageMode}
                     storageMessage={storageMessage}
                   />
-                ) : (
-                  <section className="admin-panel">
-                    <div className="section-header align-left">
-                      <span className="section-kicker">My Account</span>
-                      <h2>Your KAVARO account is active.</h2>
-                      <p>Guest users can view their own account details. Booking history will appear here when saved bookings are connected.</p>
-                    </div>
-                  </section>
-                )}
+                ) : <PartnerAccessPanel session={session} />}
               </>
             )}
           </AdminGate>
@@ -951,13 +959,76 @@ function ApartmentFilters({ filters, setFilters }) {
   );
 }
 
+function GoogleSignInButton({ onSuccess, onError }) {
+  const buttonRef = useRef(null);
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+  useEffect(() => {
+    if (!clientId || !buttonRef.current) return undefined;
+
+    let cancelled = false;
+    const renderButton = () => {
+      if (cancelled || !window.google?.accounts?.id || !buttonRef.current) return;
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async ({ credential }) => {
+          try {
+            const response = await fetch('/api/google-login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ credential }),
+            });
+            const data = await readApiJson(response);
+            onSuccess(data);
+          } catch (error) {
+            onError(error.message || 'Google sign-in failed.');
+          }
+        },
+      });
+      window.google.accounts.id.renderButton(buttonRef.current, {
+        theme: 'outline',
+        size: 'large',
+        text: 'signin_with',
+        shape: 'rectangular',
+        width: 400,
+      });
+    };
+
+    if (window.google?.accounts?.id) {
+      renderButton();
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = renderButton;
+    script.onerror = () => onError('Google sign-in could not be loaded.');
+    document.head.appendChild(script);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clientId, onError, onSuccess]);
+
+  if (!clientId) return null;
+
+  return <div className="google-signin-slot" ref={buttonRef} />;
+}
+
 function AdminGate({ children }) {
   const [session, setSession] = useState({ loading: true, authenticated: false, email: '', role: '' });
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [signup, setSignup] = useState({ fullName: '', email: '', phone: '', password: '' });
   const [reset, setReset] = useState({ email: '', code: '', newPassword: '', confirmPassword: '' });
   const [authMode, setAuthMode] = useState('login');
+  const [showResetOption, setShowResetOption] = useState(false);
+  const [emailAccessOpen, setEmailAccessOpen] = useState(false);
   const [status, setStatus] = useState('');
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   const readApiResponse = async (response) => {
     const text = await response.text();
@@ -966,7 +1037,7 @@ function AdminGate({ children }) {
     try {
       return JSON.parse(text);
     } catch {
-      throw new Error('Admin API is not available on this local server. Use Vercel deployment or run the site with vercel dev.');
+      throw new Error('Secure account services are temporarily unavailable. Please try again later.');
     }
   };
 
@@ -1001,7 +1072,8 @@ function AdminGate({ children }) {
 
   const login = async (event) => {
     event.preventDefault();
-    setStatus('Checking admin access...');
+    setShowResetOption(false);
+    setStatus('Signing you in...');
 
     try {
       const response = await fetch('/api/admin-login', {
@@ -1012,7 +1084,7 @@ function AdminGate({ children }) {
       const data = await readApiResponse(response);
 
       if (!response.ok || !data.authenticated) {
-        throw new Error(data.error || 'Admin access denied.');
+        throw new Error(data.error || 'Sign-in failed.');
       }
 
       setSession({
@@ -1025,9 +1097,29 @@ function AdminGate({ children }) {
       setCredentials({ email: '', password: '' });
       setStatus('');
     } catch (error) {
-      setStatus(error.message);
+      setReset((current) => ({ ...current, email: credentials.email }));
+      setEmailAccessOpen(true);
+      if (String(error.message || '').toLowerCase().includes('account services')) {
+        setShowResetOption(false);
+        setStatus('Secure account services are not available in this preview. Please open the Vercel Dev or deployed site to sign in.');
+      } else {
+        setShowResetOption(true);
+        setStatus('We could not sign you in with those details. Please check your email and password.');
+      }
     }
   };
+
+  const handleGoogleSuccess = useCallback((data) => {
+    setSession({
+      loading: false,
+      authenticated: true,
+      email: data.email,
+      fullName: data.fullName || '',
+      role: data.role || '',
+      id: data.id || '',
+    });
+    setStatus('');
+  }, []);
 
   const createAccount = async (event) => {
     event.preventDefault();
@@ -1072,9 +1164,7 @@ function AdminGate({ children }) {
       });
       const data = await readApiResponse(response);
       if (!response.ok) throw new Error(data.error || 'Unable to request OTP.');
-      setStatus(data.emailConfigured
-        ? data.message
-        : `${data.message} Email delivery is not configured yet; connect RESEND_API_KEY in Vercel to send real inbox OTPs.`);
+      setStatus(data.message || 'If your email is registered, a password reset code has been sent.');
     } catch (error) {
       setStatus(error.message);
     }
@@ -1094,6 +1184,7 @@ function AdminGate({ children }) {
       if (!response.ok) throw new Error(data.error || 'Unable to reset password.');
       setReset({ email: '', code: '', newPassword: '', confirmPassword: '' });
       setAuthMode('login');
+      setShowResetOption(false);
       setStatus(data.message);
     } catch (error) {
       setStatus(error.message);
@@ -1109,35 +1200,51 @@ function AdminGate({ children }) {
   if (session.loading) {
     return (
       <section className="admin-panel">
-        <p className="form-status">Checking admin session...</p>
+        <p className="form-status">Checking account session...</p>
       </section>
     );
   }
 
   if (!session.authenticated) {
     return (
-      <section className="admin-panel" aria-label="Admin login">
+      <section className="admin-panel account-access-panel" aria-label="Account access">
         <div className="section-header align-left">
+          <span className="account-access-icon" aria-hidden="true" />
           <span className="section-kicker">Account Access</span>
-          <h2>Sign in to manage your KAVARO access.</h2>
-          <p>Admins manage everything, staff manage their own rental listings, and guests manage their own account.</p>
-          <p>For local testing, run with Vercel Dev so the admin API routes are available.</p>
+          <h2>Sign in to your KAVARO Short Stay bookings.</h2>
+          <p>Access your booking details, saved enquiries and short-stay account securely.</p>
         </div>
-        <div className="manager-actions">
-          <button className={`btn ${authMode === 'login' ? 'btn-primary' : 'btn-secondary tech-link'}`} type="button" onClick={() => setAuthMode('login')}>Sign In</button>
-          <button className={`btn ${authMode === 'signup' ? 'btn-primary' : 'btn-secondary tech-link'}`} type="button" onClick={() => setAuthMode('signup')}>Create Account</button>
-          <button className={`btn ${authMode === 'reset' ? 'btn-primary' : 'btn-secondary tech-link'}`} type="button" onClick={() => setAuthMode('reset')}>Reset Password</button>
-        </div>
-        {authMode === 'login' && (
+        {googleClientId ? (
+          <GoogleSignInButton onSuccess={handleGoogleSuccess} onError={setStatus} />
+        ) : (
+          <button className="btn btn-primary auth-primary-bar" type="button" onClick={() => setEmailAccessOpen((current) => !current)}>
+            Sign In
+          </button>
+        )}
+        {!googleClientId && emailAccessOpen && (
+          <div className="manager-actions">
+            <button className={`btn ${authMode === 'login' ? 'btn-primary' : 'btn-secondary tech-link'}`} type="button" onClick={() => setAuthMode('login')}>Sign In</button>
+            <button className={`btn ${authMode === 'signup' ? 'btn-primary' : 'btn-secondary tech-link'}`} type="button" onClick={() => setAuthMode('signup')}>Create Account</button>
+            {(showResetOption || authMode === 'reset') && (
+              <button className={`btn ${authMode === 'reset' ? 'btn-primary' : 'btn-secondary tech-link'}`} type="button" onClick={() => setAuthMode('reset')}>Reset Password</button>
+            )}
+          </div>
+        )}
+        {emailAccessOpen && authMode === 'login' && (
           <form className="manager-form" onSubmit={login} noValidate>
             <div className="form-row">
               <label>Email<input name="email" type="email" value={credentials.email} onChange={update} required /></label>
               <label>Password<input name="password" type="password" value={credentials.password} onChange={update} required /></label>
             </div>
             <button className="btn btn-primary" type="submit">Sign In</button>
+            {showResetOption && (
+              <p className="account-recovery-note">
+                Having trouble signing in? You can reset your password after confirming your email.
+              </p>
+            )}
           </form>
         )}
-        {authMode === 'signup' && (
+        {emailAccessOpen && authMode === 'signup' && (
           <form className="manager-form" onSubmit={createAccount} noValidate>
             <div className="form-row">
               <label>Full name<input name="fullName" value={signup.fullName} onChange={updateSignup} required /></label>
@@ -1150,7 +1257,7 @@ function AdminGate({ children }) {
             <button className="btn btn-primary" type="submit">Create User Account</button>
           </form>
         )}
-        {authMode === 'reset' && (
+        {emailAccessOpen && authMode === 'reset' && (
           <form className="manager-form" onSubmit={resetPassword} noValidate>
             <div className="form-row">
               <label>Email<input name="email" type="email" value={reset.email} onChange={updateReset} required /></label>
@@ -1226,6 +1333,61 @@ function AccountSecurity({ session }) {
         <button className="btn btn-primary" type="submit">Change Password</button>
         {status && <p className="form-status">{status}</p>}
       </form>
+    </section>
+  );
+}
+
+function PartnerAccessPanel({ session }) {
+  const [status, setStatus] = useState('');
+  const [role, setRole] = useState(session.role);
+
+  const requestPartnerAccess = async () => {
+    setStatus('Submitting your partner request...');
+
+    try {
+      const response = await fetch('/api/account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ action: 'request-partner' }),
+      });
+      const data = await readApiJson(response);
+      setRole(data.user?.role || role);
+      setStatus(data.message || 'Your partner request has been sent for admin approval.');
+    } catch (error) {
+      setStatus(error.message || 'Unable to submit partner request.');
+    }
+  };
+
+  const content = {
+    partner: {
+      kicker: 'Partner Access',
+      title: 'Your KAVARO partner access is active.',
+      text: 'Partner tools and opportunities will appear here as they are released.',
+      action: null,
+    },
+    partner_pending: {
+      kicker: 'Partner Request',
+      title: 'Your partner request is awaiting approval.',
+      text: 'The KAVARO admin team will review your request before partner privileges are activated.',
+      action: null,
+    },
+  }[role] || {
+    kicker: 'My Account',
+    title: 'Your KAVARO account is active.',
+    text: 'You can request partner access for KAVARO opportunities. Approval is required before partner privileges are enabled.',
+    action: <button className="btn btn-primary" type="button" onClick={requestPartnerAccess}>Request Partner Access</button>,
+  };
+
+  return (
+    <section className="admin-panel">
+      <div className="section-header align-left">
+        <span className="section-kicker">{content.kicker}</span>
+        <h2>{content.title}</h2>
+        <p>{content.text}</p>
+      </div>
+      {content.action}
+      {status && <p className="form-status">{status}</p>}
     </section>
   );
 }
@@ -1306,6 +1468,8 @@ function UserManager() {
           <label>Phone<input name="phone" value={form.phone} onChange={update} /></label>
           <label>Role<select name="role" value={form.role} onChange={update}>
             <option value="user">User</option>
+            <option value="partner_pending">Partner Pending</option>
+            <option value="partner">Partner</option>
             <option value="staff">Staff</option>
             <option value="admin">Admin</option>
           </select></label>
@@ -1324,6 +1488,8 @@ function UserManager() {
               </div>
               <select value={user.role} onChange={(event) => changeRole(user, event.target.value)}>
                 <option value="user">User</option>
+                <option value="partner_pending">Partner Pending</option>
+                <option value="partner">Partner</option>
                 <option value="staff">Staff</option>
                 <option value="admin">Admin</option>
               </select>
@@ -1377,8 +1543,8 @@ function ApartmentManager({ session, customApartments, saveCustomApartment, dele
 
       setForm((current) => ({ ...current, images: [...current.images, ...imageData] }));
       setStatus(imageData.some((image) => String(image).startsWith('data:'))
-        ? 'Photo added in browser-only mode. Configure Vercel Blob for permanent image URLs.'
-        : 'Photo uploaded to Vercel Blob.');
+        ? 'Photo added to this listing.'
+        : 'Photo uploaded successfully.');
       event.target.value = '';
     } catch (error) {
       setStatus(error.message || 'Unable to upload photo.');
@@ -1433,7 +1599,7 @@ function ApartmentManager({ session, customApartments, saveCustomApartment, dele
         <span className="section-kicker">Apartment Manager</span>
         <h2>Create or edit guest-ready listings.</h2>
         <p>{storageMessage}</p>
-        <p><strong>Storage mode:</strong> {storageMode === 'database' ? 'Vercel Postgres database' : 'Browser-only fallback'}</p>
+        {storageMode === 'browser' && <p>Some listing changes may be limited to this browser session.</p>}
       </div>
       <form className="manager-form" onSubmit={submit} noValidate>
         <div className="form-row">
@@ -1895,6 +2061,8 @@ function ContactCta() {
 }
 
 function ContactPage() {
+  const params = new URLSearchParams(window.location.search);
+  const requestedType = params.get('type') || '';
   const [formStatus, setFormStatus] = useState('');
   const submit = (event) => {
     event.preventDefault();
@@ -1902,7 +2070,10 @@ function ContactPage() {
       setFormStatus('Please complete the required enquiry details.');
       return;
     }
-    setFormStatus('Thank you. Your enquiry has been prepared for the KAVARO team.');
+    const enquiryType = new FormData(event.currentTarget).get('type');
+    setFormStatus(enquiryType === 'Partnership'
+      ? 'Thank you. Your partnership enquiry has been prepared for the KAVARO team. Partner privileges require admin approval after account review.'
+      : 'Thank you. Your enquiry has been prepared for the KAVARO team.');
     event.currentTarget.reset();
   };
 
@@ -1932,7 +2103,7 @@ function ContactPage() {
             </div>
             <div className="form-row">
               <label>Country<input type="text" name="country" placeholder="Country" /></label>
-              <label>Enquiry Type<select name="type" required defaultValue=""><option value="" disabled>Select enquiry</option><option>Investment</option><option>Partnership</option><option>Property</option><option>Technology</option><option>Trading</option><option>Apartment Booking</option><option>General</option></select></label>
+              <label>Enquiry Type<select name="type" required defaultValue={requestedType}><option value="" disabled>Select enquiry</option><option>Investment</option><option>Partnership</option><option>Complaint</option><option>Property</option><option>Technology</option><option>Trading</option><option>Apartment Booking</option><option>General</option></select></label>
             </div>
             <label>Message<textarea name="message" rows="5" placeholder="Tell us about your enquiry" required /></label>
             <button type="submit" className="btn btn-secondary">Send Enquiry</button>

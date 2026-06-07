@@ -12,7 +12,7 @@ function normalizeEmail(email) {
 }
 
 function normalizeRole(role) {
-  return ['admin', 'staff', 'user'].includes(role) ? role : 'user';
+  return ['admin', 'staff', 'partner', 'partner_pending', 'user'].includes(role) ? role : 'user';
 }
 
 function normalizeUserRow(row) {
@@ -24,6 +24,9 @@ function normalizeUserRow(row) {
     fullName: row.full_name,
     phone: row.phone || '',
     role: row.role,
+    googleSub: row.google_sub || '',
+    authProvider: row.auth_provider || 'password',
+    partnerRequestedAt: row.partner_requested_at || null,
     passwordResetRequired: Boolean(row.password_reset_required),
     createdAt: row.created_at,
   };
@@ -140,6 +143,37 @@ export async function createOrUpdateUser({ id, email, fullName, phone = '', role
   return normalizeUserRow(await getUserByEmail(normalizedEmail));
 }
 
+export async function createOrUpdateGoogleUser({ email, fullName, googleSub }) {
+  if (!hasDatabase()) throw new Error('Database is not configured yet.');
+
+  await ensureUserAccountTable();
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail || !fullName || !googleSub) {
+    throw new Error('Google account details are incomplete.');
+  }
+
+  const existingByEmail = await getUserByEmail(normalizedEmail);
+  const userId = existingByEmail?.id || randomUUID();
+  const existingRole = existingByEmail?.role || 'user';
+
+  await sql`
+    INSERT INTO kavaro_users (
+      id, email, full_name, phone, role, google_sub, auth_provider, updated_at
+    )
+    VALUES (
+      ${userId}, ${normalizedEmail}, ${fullName}, ${existingByEmail?.phone || ''},
+      ${normalizeRole(existingRole)}, ${googleSub}, 'google', NOW()
+    )
+    ON CONFLICT (email) DO UPDATE SET
+      full_name = EXCLUDED.full_name,
+      google_sub = EXCLUDED.google_sub,
+      auth_provider = 'google',
+      updated_at = NOW()
+  `;
+
+  return normalizeUserRow(await getUserByEmail(normalizedEmail));
+}
+
 export async function bootstrapAdminFromEnv() {
   const email = process.env.ADMIN_EMAIL;
   const password = process.env.ADMIN_PASSWORD;
@@ -166,6 +200,23 @@ export async function bootstrapAdminFromEnv() {
 }
 
 export async function authenticateUser(email, password) {
+  if (!hasDatabase()) {
+    const adminEmail = normalizeEmail(process.env.ADMIN_EMAIL);
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (adminEmail && adminPassword && normalizeEmail(email) === adminEmail && String(password) === String(adminPassword)) {
+      return {
+        id: 'local-admin',
+        email: adminEmail,
+        fullName: 'KAVARO Administrator',
+        phone: '',
+        role: 'admin',
+        authProvider: 'password',
+        passwordResetRequired: false,
+        createdAt: null,
+      };
+    }
+  }
+
   const user = await getUserByEmail(email);
   if (!user?.password_hash || !verifyPassword(password, user.password_hash)) return null;
   return normalizeUserRow(user);
@@ -192,6 +243,22 @@ export async function updateUserRole(userId, role) {
   await sql`
     UPDATE kavaro_users
     SET role = ${normalizeRole(role)},
+        updated_at = NOW()
+    WHERE id = ${userId}
+  `;
+  return getPublicUserById(userId);
+}
+
+export async function requestPartnerPrivileges(userId) {
+  await ensureUserAccountTable();
+  const user = await getPublicUserById(userId);
+  if (!user) throw new Error('Account not found.');
+  if (user.role === 'admin' || user.role === 'partner') return user;
+
+  await sql`
+    UPDATE kavaro_users
+    SET role = 'partner_pending',
+        partner_requested_at = COALESCE(partner_requested_at, NOW()),
         updated_at = NOW()
     WHERE id = ${userId}
   `;

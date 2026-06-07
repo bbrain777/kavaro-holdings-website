@@ -11,7 +11,7 @@ export async function ensureUserAccountTable() {
       full_name TEXT NOT NULL,
       phone TEXT,
       password_hash TEXT,
-      role TEXT NOT NULL DEFAULT 'guest',
+      role TEXT NOT NULL DEFAULT 'user',
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )
@@ -19,7 +19,33 @@ export async function ensureUserAccountTable() {
 
   await sql`
     ALTER TABLE kavaro_users
+    ALTER COLUMN role SET DEFAULT 'user'
+  `;
+
+  await sql`
+    ALTER TABLE kavaro_users
     ADD COLUMN IF NOT EXISTS password_reset_required BOOLEAN DEFAULT FALSE
+  `;
+
+  await sql`
+    ALTER TABLE kavaro_users
+    ADD COLUMN IF NOT EXISTS google_sub TEXT
+  `;
+
+  await sql`
+    ALTER TABLE kavaro_users
+    ADD COLUMN IF NOT EXISTS auth_provider TEXT DEFAULT 'password'
+  `;
+
+  await sql`
+    ALTER TABLE kavaro_users
+    ADD COLUMN IF NOT EXISTS partner_requested_at TIMESTAMPTZ
+  `;
+
+  await sql`
+    CREATE UNIQUE INDEX IF NOT EXISTS kavaro_users_google_sub_idx
+    ON kavaro_users(google_sub)
+    WHERE google_sub IS NOT NULL
   `;
 
   return true;

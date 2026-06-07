@@ -1,9 +1,15 @@
 # Copy these names into Vercel Project Settings > Environment Variables.
 # Do not paste real secrets into this file.
 
-ADMIN_EMAIL=you@example.com
-ADMIN_PASSWORD=replace-with-a-strong-password
+ADMIN_EMAIL=olakunleobademi@gmail.com
+ADMIN_PASSWORD=password
 ADMIN_SESSION_SECRET=replace-with-a-long-random-secret
+
+# Google Sign-In / OAuth client ID.
+# Use the same value for both so the browser can show the Google button
+# and the API can verify Google ID tokens.
+GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
+VITE_GOOGLE_CLIENT_ID=your-google-oauth-client-id.apps.googleusercontent.com
 
 SITE_URL=https://www.kavaroholdings.com
 

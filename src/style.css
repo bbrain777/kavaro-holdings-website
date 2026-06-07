@@ -249,6 +249,86 @@ img {
   gap: 10px;
 }
 
+.header-contact-menu {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.header-contact-menu .header-cta {
+  border-radius: 4px 0 0 4px;
+}
+
+.contact-menu-toggle {
+  width: 42px;
+  min-height: 48px;
+  border: 0;
+  border-left: 1px solid rgba(7, 27, 52, 0.16);
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(135deg, var(--gold-2), var(--gold));
+  cursor: pointer;
+}
+
+.contact-menu-toggle::after {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--navy);
+  border-bottom: 2px solid var(--navy);
+  transform: translateY(-3px) rotate(45deg);
+}
+
+.contact-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 230px;
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.24);
+  border-radius: 6px;
+  background: rgba(6, 20, 38, 0.98);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 90;
+}
+
+.theme-light .contact-dropdown {
+  border-color: rgba(7, 27, 52, 0.14);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 44px rgba(7, 27, 52, 0.18);
+}
+
+.header-contact-menu:hover .contact-dropdown,
+.header-contact-menu:focus-within .contact-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.contact-dropdown a {
+  padding: 10px 12px;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.theme-light .contact-dropdown a {
+  color: rgba(7, 27, 52, 0.82);
+}
+
+.contact-dropdown a:hover {
+  background: rgba(212, 175, 55, 0.12);
+  color: var(--gold-2);
+}
+
 .icon-button,
 .nav-toggle {
   border: 1px solid rgba(255, 255, 255, 0.22);
@@ -946,6 +1026,81 @@ blockquote {
   box-shadow: 0 14px 38px rgba(7, 27, 52, 0.08);
 }
 
+.account-access-panel .section-header {
+  position: relative;
+  padding-left: 56px;
+}
+
+.account-access-icon {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 38px;
+  height: 38px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(241, 199, 91, 0.24), rgba(212, 175, 55, 0.08));
+}
+
+.account-access-icon::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 9px;
+  width: 12px;
+  height: 10px;
+  border: 2px solid var(--navy);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+.account-access-icon::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 18px;
+  width: 16px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--navy);
+}
+
+.account-recovery-note {
+  margin: -4px 0 0;
+  color: #596579;
+  line-height: 1.6;
+}
+
+.google-signin-slot {
+  min-height: 44px;
+  margin: 16px 0 18px;
+}
+
+.auth-primary-bar {
+  width: 100%;
+  min-height: 56px;
+  margin: 18px 0 0;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  color: #596579;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: rgba(7, 27, 52, 0.12);
+}
+
 .admin-session-bar {
   display: flex;
   align-items: center;
@@ -1640,6 +1795,7 @@ blockquote {
   }
 
   .header-cta,
+  .header-contact-menu,
   .icon-button {
     display: none;
   }

@@ -4,6 +4,7 @@ import {
   createPasswordOtp,
   getUserByEmail,
   getUserById,
+  requestPartnerPrivileges,
   sendOtpEmail,
   updateUserPassword,
   verifyPassword,
@@ -58,6 +59,20 @@ export default async function handler(req, res) {
 
       const updatedUser = await updateUserPassword(session.id, body.newPassword);
       return res.status(200).json({ user: updatedUser, message: 'Password changed.' });
+    }
+
+    if (body.action === 'request-partner') {
+      const session = getAdminSession(req);
+      if (!session) return res.status(401).json({ error: 'Sign in required.' });
+
+      const user = await requestPartnerPrivileges(session.id);
+      res.setHeader('Set-Cookie', createSessionCookie(user, req));
+      return res.status(200).json({
+        user,
+        message: user.role === 'partner'
+          ? 'Your partner access is already active.'
+          : 'Your partner request has been sent for admin approval.',
+      });
     }
 
     if (body.action === 'request-otp') {
