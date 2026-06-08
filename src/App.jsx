@@ -8,7 +8,7 @@ import partnersVenturesPhoto from '../images/kavaro ventures.png';
 
 const navItems = [
   { label: 'Home', href: 'index.html' },
-  { label: 'About Us', href: 'about.html' },
+  { label: 'Book Short Stay', href: 'stays.html' },
   {
     label: 'Our Businesses',
     href: 'businesses.html',
@@ -17,17 +17,19 @@ const navItems = [
       { label: 'Technologies', href: 'technologies.html' },
       { label: 'Trading', href: 'trading.html' },
       { label: 'Ventures', href: 'ventures.html' },
+      { label: 'Investments', href: 'investments.html' },
     ],
   },
+];
+
+const footerNavItems = [
+  { label: 'Home', href: 'index.html' },
+  { label: 'About Us', href: 'about.html' },
+  { label: 'Our Businesses', href: 'businesses.html' },
   { label: 'Book Short Stay', href: 'stays.html' },
-  {
-    label: 'Investments',
-    href: 'investments.html',
-    children: [
-      { label: 'Insights', href: 'references.html' },
-    ],
-  },
+  { label: 'Investments', href: 'investments.html' },
   { label: 'CSR', href: 'csr.html' },
+  { label: 'Insights', href: 'references.html' },
 ];
 
 const founderLinks = {
@@ -2363,7 +2365,7 @@ function Footer() {
           <p>KAVARO Holdings Ltd is the digital headquarters for a premium diversified corporate group spanning property, technology, trade and investment.</p>
         </div>
         <nav className="footer-nav" aria-label="Footer navigation">
-          {navItems.map((item) => <a key={item.href} href={item.href}>{item.label}</a>)}
+          {footerNavItems.map((item) => <a key={item.href} href={item.href}>{item.label}</a>)}
           <a href="founder.html">Founder</a>
           <a href="terms.html">Terms</a>
           <a href="privacy.html">Privacy</a>
