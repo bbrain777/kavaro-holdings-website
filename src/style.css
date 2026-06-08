@@ -425,11 +425,55 @@ img {
     url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=85") center/cover no-repeat;
 }
 
+.home-hero {
+  background: #061426;
+}
+
+.theme-light .home-hero {
+  background: #f7f9fc;
+}
+
+.home-hero-slides,
+.home-hero-slide,
+.home-hero::before {
+  position: absolute;
+  inset: 0;
+}
+
+.home-hero-slides {
+  z-index: 0;
+}
+
+.home-hero-slide {
+  background-position: center;
+  background-size: cover;
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 1.35s ease, transform 7s ease;
+}
+
+.home-hero-slide.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.home-hero::before {
+  content: "";
+  z-index: 1;
+  background: linear-gradient(90deg, rgba(5, 17, 31, 0.94) 0%, rgba(7, 27, 52, 0.78) 42%, rgba(7, 27, 52, 0.24) 100%);
+  pointer-events: none;
+}
+
+.theme-light .home-hero::before {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.82) 48%, rgba(255, 255, 255, 0.28) 100%);
+}
+
 .hero::after {
   content: "";
   position: absolute;
   inset: auto 0 0;
   height: 42%;
+  z-index: 1;
   background: linear-gradient(0deg, rgba(5, 17, 31, 0.9), transparent);
   pointer-events: none;
 }
@@ -440,7 +484,7 @@ img {
 
 .hero-grid {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) 360px;
   gap: 48px;

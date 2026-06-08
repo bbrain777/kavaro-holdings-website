@@ -71,6 +71,14 @@ const businessCards = [
   },
 ];
 
+const homeHeroImages = [
+  'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=85',
+  'https://images.unsplash.com/photo-1605146769289-440113cc3d00?auto=format&fit=crop&w=1800&q=85',
+  'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1800&q=85',
+  'https://images.unsplash.com/photo-1494412651409-8963ce7935a7?auto=format&fit=crop&w=1800&q=85',
+  'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1800&q=85',
+];
+
 const stats = [
   { label: 'Business Pillars', value: 4, suffix: '' },
   { label: 'Investment Focus Areas', value: 7, suffix: '' },
@@ -457,9 +465,31 @@ function SocialImpactSection() {
 }
 
 function HomePage({ animateStats, statsRef }) {
+  const [activeHeroImage, setActiveHeroImage] = useState(0);
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      setActiveHeroImage((current) => (current + 1) % homeHeroImages.length);
+    }, 6500);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
   return (
     <>
-      <section className="hero" id="home">
+      <section className="hero home-hero" id="home">
+        <div className="home-hero-slides" aria-hidden="true">
+          {homeHeroImages.map((image, index) => (
+            <div
+              className={`home-hero-slide ${index === activeHeroImage ? 'active' : ''}`}
+              key={image}
+              style={{ backgroundImage: `url("${image}")` }}
+            />
+          ))}
+        </div>
         <div className="container hero-grid">
           <div className="hero-content">
             <span className="eyebrow">Kingdom Assets, Ventures & Resource Operations</span>
