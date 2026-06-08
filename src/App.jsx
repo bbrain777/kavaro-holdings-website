@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import apartments from '../data/apartments.json';
-import logo from '../logo_kavaro holdings .png';
+import logo from '../images/logo_kavaro holdings .png';
 import founderPhoto from '../images/ty21_founder and CEO .png';
 import founderProfilePhoto from '../images/ty21_founder and CEO .png';
 import partnersMeetingPhoto from '../images/kavaro partners1.png';
