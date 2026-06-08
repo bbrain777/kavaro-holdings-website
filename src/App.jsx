@@ -2046,6 +2046,245 @@ function ReferencesPage() {
   );
 }
 
+const legalPages = {
+  terms: {
+    kicker: 'Terms & Conditions',
+    title: 'Website, enquiry and booking terms.',
+    intro: 'These terms explain how visitors, customers, partners and account users may use the KAVARO Holdings Ltd website and related online services.',
+    updated: 'Last updated: 8 June 2026',
+    sections: [
+      {
+        title: '1. About KAVARO Holdings Ltd',
+        body: [
+          'This website is operated for KAVARO Holdings Ltd, a corporate group presenting activities across property, technology, trading, ventures, investment, partnerships and social impact.',
+          'References to KAVARO, we, us or our mean KAVARO Holdings Ltd and any relevant business activity, subsidiary, trading style, project or authorised representative connected with the website.',
+        ],
+      },
+      {
+        title: '2. Use of this website',
+        body: [
+          'You may use this website for lawful personal, business, enquiry, booking and informational purposes. You must not misuse the site, attempt unauthorised access, interfere with security features, submit false information, or use the site in a way that could damage KAVARO or any third party.',
+          'We may update, suspend or withdraw parts of the website at any time for operational, security, legal or business reasons.',
+        ],
+      },
+      {
+        title: '3. Enquiries and business information',
+        body: [
+          'Information on this website is provided for general corporate and informational purposes. It does not create a binding offer, partnership, investment contract, agency relationship or professional advisory relationship unless confirmed in a separate written agreement.',
+          'Any investment, partnership, trading, acquisition or business opportunity shown on the website is subject to review, due diligence, eligibility checks, formal documentation and approval by KAVARO.',
+        ],
+      },
+      {
+        title: '4. Short-stay and accommodation bookings',
+        body: [
+          'Apartment and short-stay listings are provided to help customers prepare an enquiry or booking request. Availability, pricing, cleaning fees, deposits, guest limits and property rules may be subject to confirmation before a booking is accepted.',
+          'A booking is not final until KAVARO or the relevant accommodation operator confirms it and any required payment, deposit, identification or pre-arrival checks have been completed.',
+          'Guests are responsible for providing accurate information, complying with house rules, respecting the property, and ensuring that their stay is lawful and appropriate for the number of guests declared.',
+        ],
+      },
+      {
+        title: '5. Payments, cancellations and refunds',
+        body: [
+          'Where payments are made online, card processing may be handled by Stripe or another secure payment provider. KAVARO does not store full card numbers on this website.',
+          'Cancellation, refund, security deposit and damage policies may vary by property, booking type and confirmed agreement. Any refund or deduction may depend on timing, property condition, third-party charges and the terms confirmed at booking.',
+        ],
+      },
+      {
+        title: '6. Accounts and access',
+        body: [
+          'If account access, Google sign-in, partner access or admin/staff tools are available, users are responsible for keeping login access secure and for all activity carried out through their account.',
+          'KAVARO may restrict, suspend or remove account access where needed for security, misuse, inaccurate information, operational reasons or legal compliance.',
+        ],
+      },
+      {
+        title: '7. Intellectual property',
+        body: [
+          'The KAVARO name, website design, text, images, logos, business descriptions, page structure and other content are owned by or licensed to KAVARO unless stated otherwise.',
+          'You may view and share website links for normal use, but you must not copy, reproduce, scrape, sell, alter or commercially exploit website content without written permission.',
+        ],
+      },
+      {
+        title: '8. Liability',
+        body: [
+          'We aim to keep the website accurate and available, but we do not guarantee that all content will always be complete, current, uninterrupted or error-free.',
+          'To the fullest extent permitted by law, KAVARO is not responsible for indirect losses, loss of profit, loss of opportunity, business interruption, data loss, third-party service issues, or decisions made solely from website information.',
+        ],
+      },
+      {
+        title: '9. Governing law',
+        body: [
+          'These terms are governed by the laws of England and Wales. Any dispute connected with the website or these terms should be handled through the courts of England and Wales unless a mandatory legal rule says otherwise.',
+        ],
+      },
+      {
+        title: '10. Contact',
+        body: [
+          'Questions about these terms can be sent to info@kavaro-holdings.com or through the contact page.',
+        ],
+      },
+    ],
+  },
+  privacy: {
+    kicker: 'Privacy Policy',
+    title: 'How KAVARO handles personal information.',
+    intro: 'This policy explains what personal data may be collected through the website, why it is used, and how visitors and customers can contact KAVARO about privacy matters.',
+    updated: 'Last updated: 8 June 2026',
+    sections: [
+      {
+        title: '1. Personal data we may collect',
+        body: [
+          'We may collect information you provide through contact forms, booking forms, account access, partner requests, complaint forms or direct communication. This may include your name, email address, phone number, company, country, enquiry type, booking details, payment status, messages and account role.',
+          'If you use Google sign-in, we may receive basic profile information needed to identify and authenticate your account, such as your email address and display name.',
+        ],
+      },
+      {
+        title: '2. How we use personal data',
+        body: [
+          'We use personal data to respond to enquiries, manage booking requests, process payments, provide account access, review partner or investment enquiries, handle complaints, protect the website, keep business records and comply with legal obligations.',
+          'We may also use aggregated or non-identifying information to improve website performance, service quality and business planning.',
+        ],
+      },
+      {
+        title: '3. Legal bases for processing',
+        body: [
+          'Depending on the context, we process personal data because it is necessary to respond before entering into a contract, perform a contract, comply with legal duties, pursue legitimate business interests, protect security, or because you have given consent.',
+        ],
+      },
+      {
+        title: '4. Sharing information',
+        body: [
+          'We may share relevant information with service providers such as hosting providers, database providers, payment processors, email providers, Google sign-in services, professional advisers, legal authorities or operational partners where needed to provide the website and related services.',
+          'We do not sell personal data.',
+        ],
+      },
+      {
+        title: '5. Payments',
+        body: [
+          'Online card payments may be processed by Stripe. Payment card details are entered through the payment provider and are subject to that provider\'s own privacy and security practices. KAVARO does not store full card numbers through this website.',
+        ],
+      },
+      {
+        title: '6. Data retention',
+        body: [
+          'We keep personal data only for as long as reasonably needed for the purpose collected, including enquiry handling, booking administration, legal compliance, dispute handling, security, accounting and business record requirements.',
+        ],
+      },
+      {
+        title: '7. Your rights',
+        body: [
+          'Subject to applicable law, you may have rights to request access, correction, deletion, restriction, objection, portability or withdrawal of consent. You may also raise concerns with the UK Information Commissioner\'s Office.',
+          'To make a privacy request, contact info@kavaro-holdings.com and include enough information for us to identify the relevant record.',
+        ],
+      },
+      {
+        title: '8. Security',
+        body: [
+          'We use reasonable technical and organisational measures to protect personal information, but no website or online service can guarantee absolute security.',
+        ],
+      },
+      {
+        title: '9. International services',
+        body: [
+          'Some website tools or service providers may process information outside the United Kingdom. Where this happens, appropriate safeguards should be used where required by data protection law.',
+        ],
+      },
+      {
+        title: '10. Contact',
+        body: [
+          'Privacy questions can be sent to info@kavaro-holdings.com or through the contact page.',
+        ],
+      },
+    ],
+  },
+  cookies: {
+    kicker: 'Cookie Policy',
+    title: 'Cookies and similar technologies.',
+    intro: 'This policy explains how the KAVARO website may use cookies, local storage and third-party technologies to operate and improve the website.',
+    updated: 'Last updated: 8 June 2026',
+    sections: [
+      {
+        title: '1. What cookies are',
+        body: [
+          'Cookies are small files placed on your device by a website. Similar technologies, such as local storage, can also store settings or session information in your browser.',
+        ],
+      },
+      {
+        title: '2. Essential technologies',
+        body: [
+          'We may use essential cookies or browser storage to support website security, account sessions, booking flow state, theme preferences, form functionality and short-stay listing management.',
+          'These technologies are needed for parts of the website to work correctly and cannot always be disabled through the website itself.',
+        ],
+      },
+      {
+        title: '3. Third-party services',
+        body: [
+          'Where enabled, third-party services such as Google sign-in, Stripe payment processing, hosting, analytics or embedded content may set cookies or use similar technologies under their own policies.',
+          'KAVARO does not control every cookie set by third-party services, but we aim to use reputable providers for website operations and customer workflows.',
+        ],
+      },
+      {
+        title: '4. Analytics and improvement',
+        body: [
+          'If analytics are added in the future, they may help us understand website traffic, page performance and service interest. Where legally required, consent controls should be provided before non-essential analytics cookies are used.',
+        ],
+      },
+      {
+        title: '5. Managing cookies',
+        body: [
+          'You can usually block, delete or manage cookies through your browser settings. Blocking cookies may affect account access, booking flows, payment redirection, saved preferences or other website features.',
+        ],
+      },
+      {
+        title: '6. Updates',
+        body: [
+          'This cookie policy may be updated when website features, third-party services or legal requirements change.',
+        ],
+      },
+      {
+        title: '7. Contact',
+        body: [
+          'Questions about cookies can be sent to info@kavaro-holdings.com or through the contact page.',
+        ],
+      },
+    ],
+  },
+};
+
+function LegalPage({ type }) {
+  const page = legalPages[type];
+
+  return (
+    <>
+      <PageHero kicker={page.kicker} title={page.title} text={page.intro} />
+      <section className="section legal-page-section">
+        <div className="container legal-page-grid">
+          <aside className="legal-summary-panel">
+            <span className="section-kicker">Legal Resources</span>
+            <h2>KAVARO Holdings Ltd</h2>
+            <p>{page.updated}</p>
+            <div className="legal-link-list">
+              <a href="terms.html">Terms & Conditions</a>
+              <a href="privacy.html">Privacy Policy</a>
+              <a href="cookies.html">Cookie Policy</a>
+            </div>
+          </aside>
+          <div className="legal-document">
+            <p className="legal-disclaimer">
+              This page is provided for transparency and general website governance. It should be reviewed periodically and may be updated as KAVARO services, suppliers and legal requirements develop.
+            </p>
+            {page.sections.map((section) => (
+              <article key={section.title}>
+                <h3>{section.title}</h3>
+                {section.body.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
 function ContactCta() {
   return (
     <section className="cta-band">
@@ -2126,6 +2365,9 @@ function Footer() {
         <nav className="footer-nav" aria-label="Footer navigation">
           {navItems.map((item) => <a key={item.href} href={item.href}>{item.label}</a>)}
           <a href="founder.html">Founder</a>
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="cookies.html">Cookies</a>
         </nav>
       </div>
       <div className="container footer-bottom">
@@ -2179,6 +2421,9 @@ function App() {
     'founder.html': <FounderPage />,
     'references.html': <ReferencesPage />,
     'contact.html': <ContactPage />,
+    'terms.html': <LegalPage type="terms" />,
+    'privacy.html': <LegalPage type="privacy" />,
+    'cookies.html': <LegalPage type="cookies" />,
   }[page] || <HomePage animateStats={animateStats} statsRef={statsRef} />;
 
   return (

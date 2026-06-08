@@ -1525,6 +1525,118 @@ blockquote {
   line-height: 1.8;
 }
 
+.legal-page-section {
+  background: linear-gradient(180deg, #ffffff 0%, #f5f7fa 100%);
+}
+
+.legal-page-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+  gap: 30px;
+  align-items: start;
+}
+
+.legal-summary-panel {
+  position: sticky;
+  top: 112px;
+  border: 1px solid rgba(7, 27, 52, 0.1);
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: var(--shadow-soft);
+}
+
+.legal-summary-panel h2 {
+  margin: 8px 0;
+  font-size: 1.35rem;
+}
+
+.legal-summary-panel p {
+  margin: 0 0 18px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.legal-link-list {
+  display: grid;
+  gap: 8px;
+}
+
+.legal-link-list a {
+  border: 1px solid rgba(7, 27, 52, 0.12);
+  border-radius: 4px;
+  padding: 10px 12px;
+  color: var(--navy);
+  font-weight: 800;
+  background: #f8fafc;
+}
+
+.legal-link-list a:hover {
+  color: var(--gold);
+  border-color: rgba(202, 158, 43, 0.45);
+}
+
+.legal-document {
+  max-width: 900px;
+  color: var(--muted);
+  line-height: 1.82;
+}
+
+.legal-document article {
+  border-bottom: 1px solid rgba(7, 27, 52, 0.1);
+  padding: 0 0 22px;
+  margin-bottom: 22px;
+}
+
+.legal-document h3 {
+  margin: 0 0 10px;
+  color: var(--navy);
+  font-size: 1.25rem;
+}
+
+.legal-document p {
+  margin: 0 0 12px;
+}
+
+.legal-disclaimer {
+  border-left: 4px solid var(--gold);
+  background: rgba(202, 158, 43, 0.08);
+  color: var(--navy);
+  padding: 14px 16px;
+  margin: 0 0 26px;
+  font-weight: 700;
+}
+
+.theme-dark .legal-page-section {
+  background: linear-gradient(180deg, #071b34 0%, #061426 100%);
+}
+
+.theme-dark .legal-summary-panel,
+.theme-dark .legal-link-list a {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.theme-dark .legal-summary-panel h2,
+.theme-dark .legal-document h3,
+.theme-dark .legal-disclaimer,
+.theme-dark .legal-link-list a {
+  color: #ffffff;
+}
+
+.theme-dark .legal-document,
+.theme-dark .legal-summary-panel p {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.theme-dark .legal-document article {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.theme-dark .legal-disclaimer {
+  background: rgba(202, 158, 43, 0.16);
+}
+
 .payment-options {
   display: grid;
   gap: 14px;
@@ -1823,8 +1935,13 @@ blockquote {
   .form-row,
   .insight-grid,
   .footer-grid,
+  .legal-page-grid,
   .profile-links {
     grid-template-columns: 1fr;
+  }
+
+  .legal-summary-panel {
+    position: static;
   }
 
   .founder-links-panel {
